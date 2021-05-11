@@ -1,11 +1,11 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.19
+#version 10.2
 
 #This blits everything
 
-import pygame, model, stages, Luis
+import pygame, model, stages, Luis, Marvin
 
 #pygame initialization
 pygame.init()
@@ -163,6 +163,7 @@ def drawWall(stage, wall_mad, xWall, wStage):
 def characterBlit(stage, interact,numMess):      
     #luis
     Luis.interact(interact, numMess, stage)
+    Marvin.interact(interact, numMess, stage)
 
 
 def gemBlit(stage, gemmap):
@@ -223,11 +224,7 @@ def gemBlit9(gemmap):
         surface.blit(crystal, (w/2, h/6-h/20, w/30, w/30))
     if(map&0b10000000000):                
         surface.blit(crystal, (3*w/4-w/10, h/6-h/20, w/30, w/30))
-    #steps
-    if(map&0b1000000000):                
-        surface.blit(crystal, (w/4, 2*h/3-h/20, w/30, w/30))
-    if(map&0b100000000):                
-        surface.blit(crystal, (w/4+w/15, 11*h/30-h/20, w/30, w/30))     
+    #steps  
     if(map&0b10000000):                
         surface.blit(crystal, (w/4+2*w/15,2*h/3-h/20, w/30, w/30))     
     if(map&0b1000000):                
@@ -235,11 +232,7 @@ def gemBlit9(gemmap):
     if(map&0b100000):                
         surface.blit(crystal, (w/4+4*w/15,11*h/30-h/20, w/30, w/30)) 
     if(map&0b10000):                
-        surface.blit(crystal, (w/4+5*w/15,2*h/3-h/20, w/30, w/30)) 
-    if(map&0b1000):                
-        surface.blit(crystal, (w/4+6*w/15,11*h/30-h/20, w/30, w/30)) 
-    if(map&0b100):                
-        surface.blit(crystal, (w/4+7*w/15,2*h/3-h/20, w/30, w/30)) 
+        surface.blit(crystal, (w/4+5*w/15,2*h/3-h/20, w/30, w/30))  
     #bottom
     if(map&0b10):                
         surface.blit(crystal, (w/3,18*h/20, w/30, w/30))   
