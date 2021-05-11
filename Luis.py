@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/27/2021
 #Retro platforming game with a dark plot underneath
-#version 10.19
+#version 10.2
 
 #This files is home to Luis
 
@@ -15,12 +15,75 @@ surface= model.surface
 
 Luis=pygame.image.load("Images/Luis.png").convert_alpha()
 Luis=pygame.transform.scale(Luis,(w//12,w//12))
+x=2*w/3-w/7
+y=-h/5
+
+def getX():
+    return x
+def getY():
+    return y
+def setX(value):
+    global x
+    x=value
+def setY(value):
+    global y
+    y=value
 
 def interact(interact, numMess, stage):
     if (stage==1 and numMess<=15):
         LuisOne(interact, numMess)
     if (stage==6 and numMess<=19):
         LuisSix(interact, numMess)
+    if (stage==10 and numMess<=19):
+        LuisTen(interact, numMess)
+        
+        
+def LuisTen(interact, numMess):
+    #the character will disappear after talking to
+    surface.blit(Luis, (x, y))
+    
+    if(interact and numMess>=12):
+        #speech bubble        
+        pygame.draw.polygon(surface,model.WHITE,[(x,y),(2*w/5,4*h/5-w/10),(22*w/50,4*h/5-w/10)],3) 
+        pygame.draw.ellipse(surface,model.WHITE,(w/3,50*h/100, w/4, h/5),3)
+        pygame.draw.ellipse(surface,model.GREY,(w/3+1,50*h/100+1, w/4-2, h/5-2),0)
+        
+        if(numMess==12):
+            TenBlit1("Watcha guys talking about?")
+        elif (numMess==15):
+            TenBlit1("...")
+        elif(numMess==16):
+            TenBlit2("I told you", "he was a liar")  
+        elif(numMess==17):
+            TenBlit2("Sorry about him,", "he is pretty bad.")
+        elif(numMess==18):
+            TenBlit2("I see you've collected", "some crystals!")
+        elif(numMess==19):
+            TenBlit3("Keep up the great", "work and you'll be out", "of here in no time!")
+        
+        
+def TenBlit1(text):
+    textBounds=(w/3+w/8,60*h/100)
+    display.messagePrint(w//50,text,textBounds,model.WHITE)
+    
+def TenBlit2(text1, text2):
+    textBounds=(w/3+w/8,58*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)  
+    textBounds=(w/3+w/8,63*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE) 
+    
+def TenBlit3(text1, text2, text3):
+    textBounds=(w/3+w/8,55*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)
+    textBounds=(w/3+w/8,60*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE)
+    textBounds=(w/3+w/8,65*h/100)
+    display.messagePrint(w//50,text3,textBounds,model.WHITE)  
+            
+            
+
+    
+
     
         
 def LuisOne(interact, numMess):
@@ -129,7 +192,7 @@ def LuisSix(interact, numMess):
         elif(numMess==11):
             SixBlit2("See those crystals", "up there?")
         elif(numMess==12):        
-            SixBlit3("If you collect 100", "of them, and take", "them to the altar")
+            SixBlit3("If you collect 50", "of them, and take", "them to the altar")
         elif(numMess==13):   
             SixBlit3("According to the", "ancient writtings,", "it should")
         elif(numMess==14):

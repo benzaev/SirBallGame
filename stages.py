@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.19
+#version 10.2
 
 #Holds the stages
 
@@ -464,10 +464,27 @@ def drawStageNineSpikes():
     
 def drawStageTen():
 #contains all the blocks so I can test colides
-    blocks=[]        
+    blocks=[]         
+    #block. No going back to stage 5
+    blocks.append(pygame.Rect(-1,-1,w/200,h+2))  
     #first block
     pygame.draw.rect(surface, WHITE,(0, 14*h/30, w/5, h/60), 1)
     blocks.append(pygame.Rect(0, 14*h/30, w/5, h/60))
+    #low first
+    pygame.draw.rect(surface,WHITE,(0,9*h/10,w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(0,9*h/10,w/15,h/5+1)) 
+    #low 2
+    pygame.draw.rect(surface,WHITE,(2*w/15,9*h/10,w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(2*w/15,9*h/10,w/15,h/5+1)) 
+    #long low 3-6
+    pygame.draw.rect(surface,WHITE,(4*w/15,9*h/10,7*w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(4*w/15,9*h/10,7*w/15,h/5+1))     
+    #low 7
+    pygame.draw.rect(surface,WHITE,(12*w/15,9*h/10,w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(12*w/15,9*h/10,w/15,h/5+1))    
+    #low last
+    pygame.draw.rect(surface,WHITE,(14*w/15,9*h/10,w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(14*w/15,9*h/10,w/15,h/5+1)) 
     
     return blocks
     

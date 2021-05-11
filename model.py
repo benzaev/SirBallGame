@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.19
+#version 10.2
 
 #Holds the model
 
@@ -22,9 +22,6 @@ Mountains=pygame.transform.scale(Mountains,(w,h))
 
 DarkRealm= pygame.image.load("Images/The_Shadow_Realm.jpg")
 DarkRealm= pygame.transform.scale(DarkRealm, (w, h))
-
-Gregory=pygame.image.load("Images/Gregory.png").convert_alpha()
-Gregory=pygame.transform.scale(Gregory,(w//12,w//12))
 
 crystal=pygame.image.load("Images/crystal.png").convert_alpha()
 crystal=pygame.transform.scale(crystal,(w//30,w//30))

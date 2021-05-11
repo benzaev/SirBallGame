@@ -1,11 +1,11 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.19
+#version 10.2
 
 #moves stuff around
 
-import pygame, display, model, sys
+import pygame, display, model, sys, Luis, Marvin
 
 #pygame initialization
 pygame.init()
@@ -60,7 +60,7 @@ def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
     if(stage==9 and door9.collidepoint(xDot+w/40,yDot+w/40)):
         stage=10
         xDot=w/100
-        yDot=0
+        yDot=14*h/30-h/20
         numMess=0
         #find more music    ######################################
     
@@ -114,24 +114,24 @@ def jumpDot(keys,xDot,yDot,jump,stage,in_jump,in_fall):
     return yDot,jump,in_jump
     
 #if the dot isn't on the groun, it falls to the ground
-def fallingDot(xDot,yDot,fall,stage,in_jump,in_fall):
+def fallingDot(x,y,fall,stage,in_jump,in_fall):
     
-    yMaxi=YFloor(xDot,yDot,stage)
+    yMaxi=YFloor(x,y,stage)
     
-    if (not in_jump and yDot<yMaxi and not in_fall):
+    if (not in_jump and y<yMaxi and not in_fall):
         fall=500
         in_fall=True
     elif(not in_fall):
-        return yDot,0,in_jump,in_fall
+        return y,0,in_jump,in_fall
     
-    yDot+=((1/100)*(fall-500))**2
-    if (yDot>=yMaxi):
-        yDot=yMaxi
+    y+=((1/100)*(fall-500))**2
+    if (y>=yMaxi):
+        y=yMaxi
         in_fall=False
        
     fall-=25
 
-    return yDot,fall,in_jump,in_fall        
+    return y,fall,in_jump,in_fall        
     
     
 #stay on lines methods here
@@ -145,7 +145,7 @@ def YFloor(xDot,yDot,stage):
     #center of the Dot
     xDot+=w/40   
     yDot+=w/40
-    maxi=h
+    maxi=2*h
     blocks=display.drawStage(stage)
     for x in blocks:
         if(x.left<=xDot and x.right>=xDot):
@@ -213,7 +213,7 @@ def moveRight(xDot,yDot,stage):
 #checks if hit bottom, ran into wall, or hit spikes
 def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     #hits floor
-    if (yDot+w/20==h):
+    if (yDot+w/20>=h):
         if(wall_mad):
             xDot=7*w/8
             yDot=YFloor(xDot,0,stage)
@@ -245,9 +245,9 @@ def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     
 
 def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
-    if((xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
+    if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
         interact=True
-    if(stage==1 and numMess>15 or stage==6 and numMess>19):
+    if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19):
         interact=False
     if(interact):
         #check if want to skip talk or go to next page
@@ -255,6 +255,31 @@ def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
             numMess=100000
         elif(keys[pygame.K_c] and not keys==prevKey):
             numMess+=1  
+            
+    #Luis moving down stage 10
+    Ly=Luis.getY()
+    if (stage==10 and numMess>=4 and Ly<75*h/100):
+        Luis.setY(Ly+h/400)
+    if (stage==10 and numMess==12):
+        Luis.setY(78*h/100)
+    #Luis pushing Marvin stage 10
+    if (stage==10 and numMess>=16):
+        Lx=Luis.getX()
+        Mx=Marvin.getX()
+        My=Marvin.getY()
+        #moving right
+        if(My==78*h/100):
+            Luis.setX(Lx+w/500)
+            if(Lx+w/20>=Mx):
+                Marvin.setX(Mx+w/500)
+        #Marvin falling
+        if(Mx>11*w/15-w/30 and My<2*h):
+            Marvin.setY(My+h/100)
+        #Luis comming back
+        if (My==78*h/100+h/100):
+            Luis.setX(2*w/3-w/7)  
+            if(numMess==16):
+                numMess+=1
     
     return numMess, interact
     
@@ -380,14 +405,6 @@ def stage9Gems(xDot,yDot, gemmap, gems):
         gems+=1
         gemmap[3]=map
     #etc
-    if (map&0b1000000000 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
-        map=map&0b1110111111111
-        gems+=1
-        gemmap[3]=map
-    if (map&0b100000000 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
-        map=map&0b1111011111111
-        gems+=1
-        gemmap[3]=map
     if (map&0b10000000 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
         map=map&0b1111101111111
         gems+=1
@@ -402,14 +419,6 @@ def stage9Gems(xDot,yDot, gemmap, gems):
         gemmap[3]=map
     if (map&0b10000 and gem9.collidepoint(xDot+w/40,yDot+w/40)):
         map=map&0b1111111101111
-        gems+=1
-        gemmap[3]=map
-    if (map&0b1000 and gem10.collidepoint(xDot+w/40,yDot+w/40)):
-        map=map&0b1111111110111
-        gems+=1
-        gemmap[3]=map
-    if (map&0b100 and gem11.collidepoint(xDot+w/40,yDot+w/40)):
-        map=map&0b1111111111011
         gems+=1
         gemmap[3]=map
     if (map&0b10 and gem12.collidepoint(xDot+w/40,yDot+w/40)):

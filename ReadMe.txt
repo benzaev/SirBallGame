@@ -1,4 +1,4 @@
-Run "bouncing_ball19.py" by double clicking it. 
+After downloading all the files, run "bouncing_ball20.py" by double clicking it. 
 
 Make sure you have python and pygame installed to run the game.
 
