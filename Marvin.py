@@ -48,7 +48,7 @@ def MarvinTen(interact, numMess):
         if (numMess==0):
             TenBlit2("(hey sir ball)", "(over here)")
         elif(numMess==1):
-            TenBlit3("we have to be", "quiet, or else luis", "might here us")
+            TenBlit3("we have to be", "quiet, or else luis", "might hear us")
         elif(numMess==2):
             TenBlit3("and before you", "speak, listen to me", "very carefully")
         elif(numMess==3):
