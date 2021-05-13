@@ -60,7 +60,7 @@ def main():
             if(event.type == pygame.QUIT or (event.type==pygame.KEYDOWN and event.key==pygame.K_ESCAPE)):
                 pygame.quit()
                 sys.exit()
-                
+                                
                 
         #The Control. Does all moving parts
         (interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, jump, in_jump, in_fall, fall, deaths, 
