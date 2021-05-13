@@ -142,7 +142,7 @@ def drawAcessories(stage,wall_mad, xDot,wall_defeated):
         textBounds=(w/2,h/20)
         messagePrint(w//50,text,textBounds,model.LGREY)
         text="JUMP USING SPACEBAR"
-        textBounds=(w/2,h/20+w/50)
+        textBounds=(w/2,h/20+h/30)
         messagePrint(w//50,text,textBounds,model.LGREY)
 
     #blue button
@@ -153,7 +153,7 @@ def drawAcessories(stage,wall_mad, xDot,wall_defeated):
     if(stage==1 and wall_defeated):
         Door=model.Door
         #image of the exit door
-        surface.blit(Door, (49*w/100,2*h/25,w/10,w/60)) 
+        surface.blit(Door, (49*w/100,2*h/25,w/10,h/60)) 
         
 
 def drawWall(stage, wall_mad, xWall, wStage):

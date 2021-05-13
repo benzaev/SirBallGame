@@ -68,7 +68,7 @@ def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
 
 #starts, moves, and stops wall
 def wallMechanics (xDot, yDot,xWall,wStage,wall_mad, wall_defeated, stage, music):
-    #where the button is
+    #where the stage 1 button is
     block=pygame.Rect(89*w/200,22*h/25-h/50,2*w/15-w/25,h/50+1)    
     
     if(stage==1 and wall_mad and not wall_defeated and block.collidepoint(xDot+w/40,yDot+w/20)):
@@ -245,7 +245,9 @@ def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     
 
 def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
-    if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
+    if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
+    (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
+    (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
         interact=True
     if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19):
         interact=False
