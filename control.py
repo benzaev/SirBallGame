@@ -124,7 +124,7 @@ def fallingDot(x,y,fall,stage,in_jump,in_fall):
     elif(not in_fall):
         return y,0,in_jump,in_fall
     
-    y+=((1/100)*(fall-500))**2
+    y+=((h/69000)*(fall-500))**2
     if (y>=yMaxi):
         y=yMaxi
         in_fall=False
@@ -132,6 +132,7 @@ def fallingDot(x,y,fall,stage,in_jump,in_fall):
     fall-=25
 
     return y,fall,in_jump,in_fall        
+    
     
     
 #stay on lines methods here
@@ -245,6 +246,7 @@ def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     
 
 def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
+    numMessPrev=numMess
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
@@ -262,8 +264,11 @@ def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
     Ly=Luis.getY()
     if (stage==10 and numMess>=4 and Ly<75*h/100):
         Luis.setY(Ly+h/400)
-    if (stage==10 and numMess==12):
-        Luis.setY(78*h/100)
+    #wait for him to descend
+    if (stage==10 and numMess>11 and Ly<75*h/100):
+        numMess=numMessPrev
+    if (stage==10 and numMess==11 and Ly>75*h/100):
+        numMess+=1
     #Luis pushing Marvin stage 10
     if (stage==10 and numMess>=16):
         Lx=Luis.getX()

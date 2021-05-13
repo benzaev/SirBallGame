@@ -52,7 +52,7 @@ def main():
     wStage=5
 
     #stage dot is on
-    stage=4
+    stage=1
         
     while(True):
         keys=pygame.key.get_pressed()            
