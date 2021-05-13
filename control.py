@@ -102,7 +102,7 @@ def jumpDot(keys,xDot,yDot,jump,stage,in_jump,in_fall):
     
     #if going up, don't hit ceiling
     if (jump<=1000 and jump>500):
-        yDot-=((h/6250)*(jump-500))**2
+        yDot-=((h/65000)*(jump-500))**2
         if (yDot<ceiling):
             yDot=ceiling
             in_jump=False
