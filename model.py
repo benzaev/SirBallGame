@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.2
+#version 10.21
 
 #Holds the model
 
@@ -17,20 +17,11 @@ pygame.display.set_caption("Adventures of Sir BALL")
 
 
 #Load images
-Mountains = pygame.image.load("Images/Mountains.png")
-Mountains=pygame.transform.scale(Mountains,(w,h))
-
 DarkRealm= pygame.image.load("Images/The_Shadow_Realm.jpg")
 DarkRealm= pygame.transform.scale(DarkRealm, (w, h))
 
 crystal=pygame.image.load("Images/crystal.png").convert_alpha()
 crystal=pygame.transform.scale(crystal,(w//30,w//30))
-
-Banana=pygame.image.load("Images/innocentBanana.png").convert_alpha()
-Banana=pygame.transform.scale(Banana,(w//8,w//12))
-
-Pusheen=pygame.image.load("Images/pusheen.png").convert_alpha()
-Pusheen=pygame.transform.scale(Pusheen,(w//8,w//8))
 
 Door=pygame.image.load("Images/Door.png").convert_alpha()
 Door=pygame.transform.scale(Door,(w//8,h//3))

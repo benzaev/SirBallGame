@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.2
+#version 10.21
 
 #moves stuff around
 
@@ -102,7 +102,7 @@ def jumpDot(keys,xDot,yDot,jump,stage,in_jump,in_fall):
     
     #if going up, don't hit ceiling
     if (jump<=1000 and jump>500):
-        yDot-=((h/65000)*(jump-500))**2
+        yDot-=((jump-500)**2)*h/5700000
         if (yDot<ceiling):
             yDot=ceiling
             in_jump=False
@@ -124,7 +124,7 @@ def fallingDot(x,y,fall,stage,in_jump,in_fall):
     elif(not in_fall):
         return y,0,in_jump,in_fall
     
-    y+=((h/69000)*(fall-500))**2
+    y+=(h/8000000)*(fall-500)**2
     if (y>=yMaxi):
         y=yMaxi
         in_fall=False

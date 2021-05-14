@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.2
+#version 10.21
 
-#Update: Add Marvin the Turtle
+#Update: Fix jump mechanic for different screen types
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
