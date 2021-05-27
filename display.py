@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
 #This blits everything
 
@@ -29,10 +29,9 @@ def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeate
     #the stage blocks
     drawStage(stage)
    
-    
     #blits character/messages
     characterBlit(stage, interact,numMess)
-    
+
     #blits gems
     gemBlit(stage, gemmap)
 
@@ -44,7 +43,6 @@ def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeate
 
     #draws the dot
     drawDot(xDot,yDot)
-    
     #music
     playMusic(wall_mad,music) 
 
@@ -98,8 +96,7 @@ def drawDot(xDot,yDot):
 #selects which stage to draw then calls a method to actually draw it. Returns all blocks for collisions
 def drawStage(stage):
     #makes mouse invisible while in the stages
-    pygame.mouse.set_visible(False)
-    
+    pygame.mouse.set_visible(False)  
     if stage==1:
         return stages.drawStageOne()
     if stage==2:
@@ -120,6 +117,8 @@ def drawStage(stage):
         return stages.drawStageNine()
     if stage==10:
         return stages.drawStageTen()
+    if stage==11: 
+        return stages.drawStageEleven()
         
 def drawSpikes(stage):
     if stage==6:
@@ -130,6 +129,10 @@ def drawSpikes(stage):
         return stages.drawStageEightSpikes()
     elif stage==9:
         return stages.drawStageNineSpikes()
+    elif stage==10:
+        return stages.drawStageTenSpikes()
+    elif stage==11:
+        return stages.drawStageElevenSpikes()
     else:
         return {}
            
@@ -175,6 +178,10 @@ def gemBlit(stage, gemmap):
         gemBlit8(gemmap)
     if (stage==9):
         gemBlit9(gemmap)
+    if (stage==10):
+        gemBlit10(gemmap)
+    if (stage==11):
+        gemBlit11(gemmap)
 
 
 def gemBlit6(gemmap):
@@ -238,4 +245,38 @@ def gemBlit9(gemmap):
         surface.blit(crystal, (w/3,18*h/20, w/30, w/30))   
     if(map&0b1):                
         surface.blit(crystal, (2*w/3,18*h/20, w/30, w/30))
+        
+def gemBlit10(gemmap):
+    crystal=model.crystal
+    map=gemmap[4]
+    
+    #left
+    if(map&10):
+        surface.blit(crystal, (w/50, 9*h/10-h/20, w/30, h/30)) 
+    #right
+    if(map&1):
+        surface.blit(crystal, (19*w/20, 9*h/10-h/20, w/30, h/30))
+    
+    
+def gemBlit11(gemmap):
+    crystal=model.crystal
+    map=gemmap[5]
+    #first                                              
+    if(map&100000):
+        surface.blit(crystal, (5*w/12-4*w/15, 11*h/30-h/20, w/30, h/30)) 
+    #second...
+    if(map&0b10000):
+        surface.blit(crystal, (5*w/12-2*w/15, 11*h/30-h/20, w/30, h/30))
+    if(map&0b1000):
+        surface.blit(crystal, (5*w/12, 11*h/30-h/20, w/30, h/30))
+    if(map&0b100):
+        surface.blit(crystal, (5*w/12+2*w/15, 11*h/30-h/20, w/30, h/30))
+    if(map&0b10):
+        surface.blit(crystal, (5*w/12+4*w/15, 11*h/30-h/20, w/30, h/30))
+    if(map&0b1):
+        surface.blit(crystal, (5*w/12+6*w/15, 11*h/30-h/20, w/30, h/30))
+    
+    
+    
+    
 

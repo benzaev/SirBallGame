@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
-#Update: Fix jump mechanic for different screen types
+#Update: Add moving platforms
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -42,7 +42,7 @@ def main():
     music=0
     
     #gems bitmap
-    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111]
+    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111, 0b11, 0b111111]
     gems=0
     
     #lvl 1 wall
@@ -73,8 +73,8 @@ def main():
         
         #standard display output
         pygame.display.update()
-        clock.tick(25)        
-    
+        clock.tick(25)      
+            
 main()    
 
 it= input("")

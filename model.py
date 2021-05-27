@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
 #Holds the model
 
@@ -14,7 +14,6 @@ pygame.init()
 surface= pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 w, h = pygame.display.get_surface().get_size()
 pygame.display.set_caption("Adventures of Sir BALL")
-
 
 #Load images
 DarkRealm= pygame.image.load("Images/The_Shadow_Realm.jpg")
@@ -48,3 +47,21 @@ LGREEN= (47, 237, 47)
 YELLOW=(255,255,0)
 GREY=(34,34,34)
 LGREY=(169,169,169)
+
+#objects that move around are stored here
+movingObjects=[]
+
+def addMovingObject(object):
+    transfer=[]
+    for obj in movingObjects:
+        transfer.append(obj)
+        
+    transfer.append(object)    
+    finishTransfer(transfer)
+    
+def finishTransfer(transfer):
+    global movingObjects
+    movingObjects=transfer
+    
+    
+    

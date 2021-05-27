@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
 #Holds the stages
 
@@ -15,7 +15,6 @@ h=model.h
 surface=model.surface
 
 WHITE=model.WHITE
-
 
 ###########################################################   LEVEL ONE   ############################################################
 
@@ -487,6 +486,188 @@ def drawStageTen():
     blocks.append(pygame.Rect(14*w/15,9*h/10,w/15,h/5+1)) 
     
     return blocks
+    
+def drawStageTenSpikes():
+    spike=model.spike
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #spikes
+    #left
+    surface.blit(spike, (9*w/60,9*h/10-h/17,w/20,h/20))
+    spikes.append(pygame.Rect(9*w/60+w/60,9*h/10-h/24,w/60,h/22))
+    #right
+    surface.blit(spike, (12*w/15,9*h/10-h/17,w/20,h/20))
+    spikes.append(pygame.Rect(12*w/15+w/60,9*h/10-h/24,w/60,h/22))
+
+    return spikes
+    
+def drawStageEleven():
+    #contains all the blocks so I can test colides
+    blocks=[]   
+    #first
+    pygame.draw.rect(surface,WHITE,(0,9*h/10,w/10,h/5+1),1) 
+    blocks.append(pygame.Rect(0,9*h/10,w/10,h/5+1)) 
+    #lowest
+    pygame.draw.rect(surface,WHITE,(w/10,39*h/40,8*w/10,h/5),1) 
+    blocks.append(pygame.Rect(w/10,39*h/40,8*w/10,h/5))
+    
+    #moving platform 1
+    if(model.movingObjects==[]):
+        block1=movingObject(0, 1333, w/20, h/60, WHITE, 2000)
+        model.addMovingObject(block1)
+    blocks.append(model.movingObjects[0].drawBlock())   
+    model.movingObjects[0].setX(model.movingObjects[0].x+1)
+    #moving platform 2
+    if(len(model.movingObjects)==1):
+        block2=movingObject(666, 1333, w/20, h/60, WHITE, 2000)
+        model.addMovingObject(block2)
+    blocks.append(model.movingObjects[1].drawBlock())   
+    model.movingObjects[1].setX(model.movingObjects[1].x+1)
+    #moving platform 3
+    if(len(model.movingObjects)==2):
+        block3=movingObject(1333, 1333, w/20, h/60, WHITE, 2000)
+        model.addMovingObject(block3)
+    blocks.append(model.movingObjects[2].drawBlock())   
+    model.movingObjects[2].setX(model.movingObjects[2].x+1)
+    
+    #step -four 
+    pygame.draw.rect(surface, WHITE,(5*w/12-4*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-4*w/15, 11*h/30, w/30, h/60))
+    #step -three 
+    pygame.draw.rect(surface, WHITE,(5*w/12-3*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-3*w/15, 11*h/30, w/30, h/60))
+    #step -two 
+    pygame.draw.rect(surface, WHITE,(5*w/12-2*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-2*w/15, 11*h/30, w/30, h/60))
+    #step -one 
+    pygame.draw.rect(surface, WHITE,(5*w/12-w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-w/15, 11*h/30, w/30, h/60))
+    #step two 
+    pygame.draw.rect(surface, WHITE,(5*w/12, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(w/4+w/6, 11*h/30, w/30, h/60))
+    #step three 
+    pygame.draw.rect(surface, WHITE,(5*w/12+w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+w/15, 11*h/30, w/30, h/60))
+    #step four
+    pygame.draw.rect(surface, WHITE,(5*w/12+2*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+2*w/15, 11*h/30, w/30, h/60))
+    #step five
+    pygame.draw.rect(surface, WHITE,(5*w/12+3*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+3*w/15, 11*h/30, w/30, h/60))
+    #step six
+    pygame.draw.rect(surface, WHITE,(5*w/12+4*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+4*w/15, 11*h/30, w/30, h/60))
+    #step seven
+    pygame.draw.rect(surface, WHITE,(5*w/12+5*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+5*w/15, 11*h/30, w/30, h/60))
+    #step eight
+    pygame.draw.rect(surface, WHITE,(5*w/12+6*w/15, 11*h/30, w/30, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+6*w/15, 11*h/30, w/30, h/60))
+    #heighest
+    pygame.draw.rect(surface,WHITE,(w/10,h/6,8*w/10,h/30),1) 
+    blocks.append(pygame.Rect(w/10,39*h/40,8*w/10,h/5))
+    #low last
+    pygame.draw.rect(surface,WHITE,(9*w/10,9*h/10,w/10,h/5+1),1) 
+    blocks.append(pygame.Rect(9*w/10,9*h/10,w/10,h/5+1))   
+    
+    return blocks
+    
+    
+def drawStageElevenSpikes():
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #spikes    
+    #first line
+    offset=-6*w/40
+    n=32
+    while(n>0):
+        surface.blit(spikeD, (w/4-w/90+offset,h/5-h/50,w/20,h/20))
+        n-=1
+        offset+=w/40
+    spikes.append(pygame.Rect(w/10, h/5+h/100,8*w/10, h/30))
+
+    #bottom row 
+    surface.blit(spike, (w/4-w/90-6*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90-5*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90-4*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90-3*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90-2*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90-w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+2*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+3*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+4*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+5*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+6*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+7*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+8*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+9*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+10*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+11*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+12*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+13*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+14*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+15*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+16*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+17*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+18*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+19*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+20*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+21*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+22*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+23*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+24*w/40,9*h/10+h/100,w/20,h/20))
+    surface.blit(spike, (w/4-w/90+25*w/40,9*h/10+h/100,w/20,h/20))
+    spikes.append(pygame.Rect(w/10, 9*h/10+h/30,8*w/10, h/30))    
+    return spikes
+
+
+
+
+
+
+#moving block wherever you want
+class movingObject:
+    def __init__(self, x, y, width, height, color, rate):
+        self.x = x
+        self.y = y 
+        self.width=width
+        self.height=height
+        self.color=color
+        self.rate=rate
+        
+    def setX(self, value):
+        if(self.x>self.rate):
+            self.x=-self.width
+        else:
+            self.x=value
+            
+    def setY(self, value):
+        if(self.y>self.rate):
+            self.y=0
+        else:
+            self.y=value   
+            
+    def drawBlock(self):
+        pygame.draw.rect(surface,self.color,(self.x*w/self.rate,self.y*h/self.rate, self.width, self.height),1) 
+        return (pygame.Rect(self.x*w/self.rate,self.y*h/self.rate, self.width, self.height))
+
+
+
+
+
+
+
+
+
+
     
     
     

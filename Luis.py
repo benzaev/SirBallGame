@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/27/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
 #This files is home to Luis
 
@@ -204,7 +204,7 @@ def LuisSix(interact, numMess):
         elif(numMess==17):
             SixBlit2("I know", "you can do it!")
         elif(numMess==18):  
-            SixBlit1("Get those 100 crystals!") 
+            SixBlit1("Get those 50 crystals!") 
         elif(numMess==19):  
             SixBlit1("Good luck!")
        

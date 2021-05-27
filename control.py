@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.21
+#version 10.22
 
 #moves stuff around
 
@@ -39,7 +39,7 @@ def controller(interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, sta
     #does interaction
     numMess, interact = characterInteractions(xDot, yDot, numMess, interact, keys, prevKey, stage)
             
-    #soon, add more leves
+    #checks if goes through a door
     stage, xDot, yDot, numMess, wall_mad, music= nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music)            
     #allows for test KEYUP
     prevKey=keys
@@ -237,7 +237,7 @@ def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     player= pygame.Rect(xDot,yDot+w/100,w/20,3*w/100)
     for x in spikes:
         if (x.colliderect(player)):
-            xDot=w/8
+            xDot=w/15
             yDot=YFloor(xDot,h/3,stage)
             deaths+=1
     
@@ -265,7 +265,7 @@ def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
     if (stage==10 and numMess>=4 and Ly<75*h/100):
         Luis.setY(Ly+h/400)
     #wait for him to descend
-    if (stage==10 and numMess>11 and Ly<75*h/100):
+    if (stage==10 and numMess>11 and  numMess<900 and Ly<75*h/100):
         numMess=numMessPrev
     if (stage==10 and numMess==11 and Ly>75*h/100):
         numMess+=1
@@ -302,7 +302,11 @@ def collectGem(xDot, yDot, stage, gemmap, gems):
         gemmap, gems=stage8Gems(xDot, yDot, gemmap, gems)
     if (stage==9):
         gemmap, gems=stage9Gems(xDot, yDot, gemmap, gems)
-
+    if (stage==10):
+        gemmap, gems=stage10Gems(xDot, yDot, gemmap, gems)
+    if (stage==11):
+        gemmap, gems=stage11Gems(xDot, yDot, gemmap, gems)
+        
     return gemmap, gems    
     
 def stage6Gems(xDot, yDot, gemmap, gems):
@@ -439,4 +443,75 @@ def stage9Gems(xDot,yDot, gemmap, gems):
 
         
     return gemmap, gems
+    
+def stage10Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[4]
+    gem1=pygame.Rect(w/50, 9*h/10-h/20, w/30, h/20)          
+    gem2=pygame.Rect(19*w/20, 9*h/10-h/20, w/30, h/20) 
+    #first gem
+    if (map&10 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&1
+        gems+=1
+        gemmap[4]=map
+    #second gem
+    if (map&1 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&10
+        gems+=1
+        gemmap[4]=map
+        
+    return gemmap, gems
+    
+def stage11Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[5]
+    gem1=pygame.Rect(5*w/12-4*w/15, 11*h/30-h/18, w/30, h/30) 
+    gem2=pygame.Rect(5*w/12-2*w/15, 11*h/30-h/18, w/30, h/30) 
+    gem3=pygame.Rect(5*w/12, 11*h/30-h/20, w/18, h/30) 
+    gem4=pygame.Rect(5*w/12+2*w/15, 11*h/30-h/18, w/30, h/30) 
+    gem5=pygame.Rect(5*w/12+4*w/15, 11*h/30-h/18, w/30, h/30) 
+    gem6=pygame.Rect(5*w/12+6*w/15, 11*h/30-h/18, w/30, h/30) 
+        
+    #first gem
+    if (map&0b100000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11111
+        gems+=1
+        gemmap[5]=map
+    #second gem...
+    if (map&0b10000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b101111
+        gems+=1
+        gemmap[5]=map
+    if (map&0b1000 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b110111
+        gems+=1
+        gemmap[5]=map
+    if (map&0b100 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111011
+        gems+=1
+        gemmap[5]=map
+    if (map&0b10 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111101
+        gems+=1
+        gemmap[5]=map
+    if (map&0b1 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111110
+        gems+=1
+        gemmap[5]=map
+
+    return gemmap, gems
+    
+    
+#gets the two MSD of a num
+#returns a two digit int
+def getTwoMostSig(num):
+    factor=1
+    while (num//factor>99):
+        facotr*=10
+    return(num//factor)
+
+
+
+
+
+
+
 
