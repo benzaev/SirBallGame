@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.22
+#version 10.24
 
-#Update: Add moving platforms
+#Update: Add more levels
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -42,7 +42,7 @@ def main():
     music=0
     
     #gems bitmap
-    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111, 0b11, 0b111111]
+    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111, 0b11, 0b111111, 0b111111, 0b111, 0b11111, 0b11111]
     gems=0
     
     #lvl 1 wall
@@ -61,7 +61,6 @@ def main():
                 pygame.quit()
                 sys.exit()
                                 
-                
         #The Control. Does all moving parts
         (interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, jump, in_jump, in_fall, fall, deaths, 
             numMess, prevKey, music, gemmap, gems) = control.controller(interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, 
@@ -73,8 +72,8 @@ def main():
         
         #standard display output
         pygame.display.update()
-        clock.tick(25)      
-            
+        clock.tick(25) 
+
 main()    
 
 it= input("")

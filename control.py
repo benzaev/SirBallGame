@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.22
+#version 10.24
 
 #moves stuff around
 
@@ -15,7 +15,14 @@ h=model.h
 
 #all moving parts
 def controller(interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, keys, jump, in_jump, in_fall, fall, deaths, numMess, prevKey, music, gemmap, gems):
+    #master control
+    if (keys[pygame.K_a] and not keys==prevKey):
+        stage+=1  
+    if (keys[pygame.K_b] and not keys==prevKey):
+        stage-=1
+    
     music=0
+    moveBlocks()
     #if not currently interacting with a character, continue on
     if (not interact):
         #wall mechanics
@@ -37,18 +44,24 @@ def controller(interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, sta
         gemmap, gems= collectGem(xDot, yDot, stage, gemmap, gems)
         
     #does interaction
-    numMess, interact = characterInteractions(xDot, yDot, numMess, interact, keys, prevKey, stage)
+    numMess, interact, music = characterInteractions(xDot, yDot, numMess, interact, keys, prevKey, stage, music)
             
     #checks if goes through a door
-    stage, xDot, yDot, numMess, wall_mad, music= nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music)            
+    stage, xDot, yDot, numMess, wall_mad, music= nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music)   
+        
     #allows for test KEYUP
     prevKey=keys
     
     return interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, jump, in_jump, in_fall, fall, deaths, numMess, prevKey, music, gemmap, gems
 
+#moves all the movable blocks
+def moveBlocks():
+    for x in model.movingObjects:
+        x.moveSelf()
 
 #checks if Sir Ball went through a door
 def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
+    #goes through door on first stage
     if(stage==1 and wall_defeated and (xDot)>=49*w/100 and (xDot<=49*w/100+w/20) and (yDot<=2*h/5)):
         stage=6
         xDot=w/100
@@ -56,13 +69,21 @@ def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
         numMess=0
         wall_mad=False
         music=1
+    #goes through door on stage 9
     door9=pygame.Rect(9*w/10, h/2-h/3, w/10, h/3)
     if(stage==9 and door9.collidepoint(xDot+w/40,yDot+w/40)):
         stage=10
         xDot=w/100
         yDot=14*h/30-h/20
         numMess=0
-        #find more music    ######################################
+    #goes through door on stage 15
+    door15=pygame.Rect(17*w/20, h//5,w//12, h//5)
+    if(stage==15 and door15.collidepoint(xDot+w/40,yDot+w/40)):
+        stage=16
+        xDot=w/100
+        yDot=h/2
+        numMess=0
+        model.resetMovingObjects()
     
     return stage, xDot, yDot, numMess, wall_mad, music
 
@@ -70,12 +91,14 @@ def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
 def wallMechanics (xDot, yDot,xWall,wStage,wall_mad, wall_defeated, stage, music):
     #where the stage 1 button is
     block=pygame.Rect(89*w/200,22*h/25-h/50,2*w/15-w/25,h/50+1)    
-    
+    #presses the button to stop the wall
     if(stage==1 and wall_mad and not wall_defeated and block.collidepoint(xDot+w/40,yDot+w/20)):
         wall_defeated=True
+    #activates the stage 5 wall
     if(not wall_defeated and not wall_mad and stage==5 and xDot>=12*w/20):
         wall_mad=True
         music=2
+    #moves the wall
     if(wall_mad):
         xWall-=w/220
         if(xWall<=0):
@@ -118,7 +141,7 @@ def fallingDot(x,y,fall,stage,in_jump,in_fall):
     
     yMaxi=YFloor(x,y,stage)
     
-    if (not in_jump and y<yMaxi and not in_fall):
+    if (not in_jump and y<yMaxi-2 and not in_fall):
         fall=500
         in_fall=True
     elif(not in_fall):
@@ -186,8 +209,7 @@ def moveDot(keys,xDot,yDot,stage):
         else:
             if (stage!=1):
                 xDot=w-w/20
-                stage-=1
-                
+                stage-=1                
     return xDot,stage
         
 
@@ -217,42 +239,75 @@ def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
     if (yDot+w/20>=h):
         if(wall_mad):
             xDot=7*w/8
-            yDot=YFloor(xDot,0,stage)
+            resetY=0
             deaths+=1
+            while(True):
+                yDot=YFloor(xDot,resetY,stage)
+                if(yDot>=h):
+                    xDot-=w/100
+                    resetY-=h/50
+                else:
+                    break
         else:   
             xDot=w/8
-            yDot=YFloor(xDot,h/3,stage)
             deaths+=1
+            resetY=h/2
+            while(True):
+                yDot=YFloor(xDot,resetY,stage)
+                if(yDot>=h):
+                    xDot-=w/100
+                    resetY-=h/50
+                else:
+                    break
     #hits wall
     if(wall_mad and wStage==stage and xWall<=xDot+w/20):
         stage=5
         xDot=w/8
-        yDot=YFloor(xDot,h/2,stage)
         deaths+=1
         xWall=w
         wStage=5
         wall_defeated=False
+        resetY=h/2
+        while(True):
+            yDot=YFloor(xDot,resetY,stage)
+            if(yDot>=h):
+                xDot-=w/100
+                resetY-=h/50
+            else:
+                break
     #hits spikes
     spikes=display.drawSpikes(stage)
     player= pygame.Rect(xDot,yDot+w/100,w/20,3*w/100)
     for x in spikes:
         if (x.colliderect(player)):
             xDot=w/15
-            yDot=YFloor(xDot,h/3,stage)
             deaths+=1
-    
+            resetY=h/3
+            while(True):
+                yDot=YFloor(xDot,resetY,stage)
+                if(yDot>=h):
+                    xDot-=w/100
+                    resetY-=h/50
+                else:
+                    break    
+                    
     return xWall,wStage,xDot,yDot,stage,deaths, wall_defeated
     
     
 
-def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
+def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage, music):
     numMessPrev=numMess
+    #if gets close to a character, begin interaction
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
         interact=True
+    #ends interaction after all messages shown
     if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19):
         interact=False
+    if(stage==10 and (numMess==20 or numMess==100000)):
+        music=3
+        numMess+=1
     if(interact):
         #check if want to skip talk or go to next page
         if keys[pygame.K_s]:
@@ -288,7 +343,7 @@ def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage):
             if(numMess==16):
                 numMess+=1
     
-    return numMess, interact
+    return numMess, interact, music
     
 #collects gems for Sir Ball
 def collectGem(xDot, yDot, stage, gemmap, gems):  
@@ -306,6 +361,18 @@ def collectGem(xDot, yDot, stage, gemmap, gems):
         gemmap, gems=stage10Gems(xDot, yDot, gemmap, gems)
     if (stage==11):
         gemmap, gems=stage11Gems(xDot, yDot, gemmap, gems)
+    if (stage==12):
+        gemmap, gems=stage12Gems(xDot, yDot, gemmap, gems)
+    if (stage==13):
+        gemmap, gems=stage13Gems(xDot, yDot, gemmap, gems)
+    if (stage==14):
+        gemmap, gems=stage14Gems(xDot, yDot, gemmap, gems)
+    if(stage==15):
+        gemmap, gems=stage15Gems(xDot, yDot, gemmap, gems)
+
+
+    
+
         
     return gemmap, gems    
     
@@ -498,6 +565,125 @@ def stage11Gems(xDot, yDot, gemmap, gems):
         gemmap[5]=map
 
     return gemmap, gems
+    
+    
+def stage12Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[6]
+    gem1=pygame.Rect(2*w/6, h/10, w/30, h/30)          
+    gem2=pygame.Rect(3*w/6, h/10, w/30, h/30) 
+    gem3=pygame.Rect(4*w/6, h/10, w/30, h/30)          
+    gem4=pygame.Rect(5*w/12, 13*h/32, w/30, h/30) 
+    gem5=pygame.Rect(7*w/12, 13*h/32, w/30, h/30)          
+    gem6=pygame.Rect(9*w/12, 13*h/32, w/30, h/30) 
+    #first gem
+    if (map&0b100000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11111
+        gems+=1
+        gemmap[6]=map
+    #second gem ...
+    if (map&0b10000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b101111
+        gems+=1
+        gemmap[6]=map
+    if (map&0b1000 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b110111
+        gems+=1
+        gemmap[6]=map
+    if (map&0b100 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111011
+        gems+=1
+        gemmap[6]=map
+    if (map&0b10 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111101
+        gems+=1
+        gemmap[6]=map
+    if (map&0b1 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b111110
+        gems+=1
+        gemmap[6]=map
+        
+    return gemmap, gems   
+
+def stage13Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[7]
+    gem1=pygame.Rect(w/90, 3*h/12-h/20, w/30, h/30)          
+    gem2=pygame.Rect(w/90+w/20, 3*h/12-h/20, w/30, h/30) 
+    gem3=pygame.Rect(w/90+2*w/20, 3*h/12-h/20, w/30, h/30)           
+    if (map&0b100 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11
+        gems+=1
+        gemmap[7]=map
+    if (map&0b10 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b101
+        gems+=1
+        gemmap[7]=map
+    if (map&0b1 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b110
+        gems+=1
+        gemmap[7]=map
+        
+    return gemmap, gems     
+
+def stage14Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[8]
+    gem1=pygame.Rect(w/4, h/2-h/20, w/30, h/30)          
+    gem2=pygame.Rect(w/4+3*w/20, 6*h/10, w/30, h/30) 
+    gem3=pygame.Rect(w/4+3*w/10, h/2-h/20, w/30, h/30)   
+    gem4=pygame.Rect(w/4+9*w/20, 6*h/10, w/30, h/30) 
+    gem5=pygame.Rect(w/4+6*w/10, h/2-h/20, w/30, h/30) 
+    if (map&0b10000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b1111
+        gems+=1
+        gemmap[8]=map
+    if (map&0b1000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b10111
+        gems+=1
+        gemmap[8]=map
+    if (map&0b100 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11011
+        gems+=1
+        gemmap[8]=map
+    if (map&0b10 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11101
+        gems+=1
+        gemmap[8]=map
+    if (map&0b1 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11110
+        gems+=1
+        gemmap[8]=map
+
+    return gemmap, gems  
+    
+def stage15Gems(xDot, yDot, gemmap, gems):
+    map=gemmap[9]
+    gem1=pygame.Rect(9*w/12, 5*h/8, w/30, h/30)          
+    gem2=pygame.Rect(10*w/12, 4*h/8, w/30, h/30) 
+    gem3=pygame.Rect(9*w/12, 3*h/8, w/30, h/30)   
+    gem4=pygame.Rect(9*w/12, 2*h/8, w/30, h/30) 
+    gem5=pygame.Rect(3*w/5, h/6, w/30, h/30) 
+    if (map&0b10000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b1111
+        gems+=1
+        gemmap[9]=map
+    if (map&0b1000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b10111
+        gems+=1
+        gemmap[9]=map
+    if (map&0b100 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11011
+        gems+=1
+        gemmap[9]=map
+    if (map&0b10 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11101
+        gems+=1
+        gemmap[9]=map
+    if (map&0b1 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+        map=map&0b11110
+        gems+=1
+        gemmap[9]=map
+
+    return gemmap, gems 
+
     
     
 #gets the two MSD of a num

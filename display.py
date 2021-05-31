@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.22
+#version 10.24
 
 #This blits everything
 
@@ -17,7 +17,10 @@ surface= model.surface
 
 #projects to screen
 def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeated, xDot, yDot, xWall, wStage, music, gemmap, gems):
-    #background image
+    #makes mouse invisible while in the stages
+    pygame.mouse.set_visible(False)  
+    
+   #background image
     background()
 
     #draws the wall
@@ -43,6 +46,7 @@ def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeate
 
     #draws the dot
     drawDot(xDot,yDot)
+    
     #music
     playMusic(wall_mad,music) 
 
@@ -52,13 +56,16 @@ def background():
     surface.blit(DarkRealm, (0, 0)) 
 
 #plays music. Skip allows new song to play before old one finishes
-    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad
+    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins
 def playMusic(wall_mad,skip):
     if (skip==1):
         track='Audio/Fallen_Reprise.wav'
         pygame.mixer.music.stop()
     elif(skip==2):
         track='Audio/Mad.wav'
+        pygame.mixer.music.stop()
+    elif(skip==3):
+        track='Audio/Ruins.wav'
         pygame.mixer.music.stop()
     elif(not pygame.mixer.music.get_busy()):
         track='Audio/Fallen_Reprise.wav'
@@ -95,8 +102,6 @@ def drawDot(xDot,yDot):
     
 #selects which stage to draw then calls a method to actually draw it. Returns all blocks for collisions
 def drawStage(stage):
-    #makes mouse invisible while in the stages
-    pygame.mouse.set_visible(False)  
     if stage==1:
         return stages.drawStageOne()
     if stage==2:
@@ -119,6 +124,17 @@ def drawStage(stage):
         return stages.drawStageTen()
     if stage==11: 
         return stages.drawStageEleven()
+    if stage==12:
+        return stages.drawStageTwelve()
+    if stage==13:
+        return stages.drawStageThirteen()
+    if stage==14:
+        return stages.drawStageFourteen()
+    if stage==15:
+        return stages.drawStageFifteen()
+    if stage==16:
+        return stages.drawStageSixteen()
+
         
 def drawSpikes(stage):
     if stage==6:
@@ -133,8 +149,16 @@ def drawSpikes(stage):
         return stages.drawStageTenSpikes()
     elif stage==11:
         return stages.drawStageElevenSpikes()
+    elif stage==12:
+        return stages.drawStageTwelveSpikes()
+    elif stage==13:
+        return stages.drawStageThirteenSpikes()
+    elif stage==14:
+        return stages.drawStageFourteenSpikes()
+    elif stage==15:
+        return stages.drawStageFifteenSpikes()
     else:
-        return {}
+        return []
            
     
 #draws arrows and background messages
@@ -172,16 +196,24 @@ def characterBlit(stage, interact,numMess):
 def gemBlit(stage, gemmap):
     if (stage==6):
         gemBlit6(gemmap)
-    if (stage==7):
+    elif (stage==7):
         gemBlit7(gemmap)
-    if (stage==8):
+    elif (stage==8):
         gemBlit8(gemmap)
-    if (stage==9):
+    elif (stage==9):
         gemBlit9(gemmap)
-    if (stage==10):
+    elif (stage==10):
         gemBlit10(gemmap)
-    if (stage==11):
+    elif (stage==11):
         gemBlit11(gemmap)
+    elif (stage==12):
+        gemBlit12(gemmap)
+    elif(stage==13):
+        gemBlit13(gemmap)
+    elif(stage==14):
+        gemBlit14(gemmap)
+    elif(stage==15):
+        gemBlit15(gemmap)
 
 
 def gemBlit6(gemmap):
@@ -276,6 +308,71 @@ def gemBlit11(gemmap):
     if(map&0b1):
         surface.blit(crystal, (5*w/12+6*w/15, 11*h/30-h/20, w/30, h/30))
     
+def gemBlit12(gemmap):
+    crystal=model.crystal
+    map=gemmap[6]
+    #first                                              
+    if(map&0b100000):
+        surface.blit(crystal, (2*w/6, h/10, w/30, h/30)) 
+    #second...
+    if(map&0b10000):
+        surface.blit(crystal, (3*w/6, h/10, w/30, h/30)) 
+    if(map&0b1000):
+        surface.blit(crystal, (4*w/6, h/10, w/30, h/30)) 
+    if(map&0b100):
+        surface.blit(crystal, (5*w/12, 13*h/32, w/30, h/30)) 
+    if(map&0b10):
+        surface.blit(crystal, (7*w/12, 13*h/32, w/30, h/30)) 
+    if(map&0b1):
+        surface.blit(crystal, (9*w/12, 13*h/32, w/30, h/30)) 
+
+
+#36 gems total
+def gemBlit13(gemmap):
+    crystal=model.crystal
+    map=gemmap[7]
+    if(map&0b100):
+        surface.blit(crystal, (w/90, 3*h/12-h/20, w/30, h/30)) 
+    if(map&0b10):
+        surface.blit(crystal, (w/90+w/20, 3*h/12-h/20, w/30, h/30)) 
+    if(map&0b1):
+        surface.blit(crystal, (w/90+2*w/20, 3*h/12-h/20, w/30, h/30)) 
+        
+#41 gems total
+def gemBlit14(gemmap):
+    crystal=model.crystal
+    map=gemmap[8]
+    if(map&0b10000):    
+        surface.blit(crystal,(w/4, h/2-h/20, w/30, h/30))
+    if(map&0b1000):    
+        surface.blit(crystal,(w/4+3*w/20, 6*h/10, w/30, h/30))
+    if(map&0b100):    
+        surface.blit(crystal,(w/4+3*w/10, h/2-h/20, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(w/4+9*w/20, 6*h/10, w/30, h/30))
+    if(map&0b1):    
+        surface.blit(crystal,(w/4+6*w/10, h/2-h/20, w/30, h/30))
+
+def gemBlit15(gemmap):
+    crystal=model.crystal
+    map=gemmap[9]
+    if(map&0b10000):    
+        surface.blit(crystal,(9*w/12, 5*h/8, w/30, h/30))
+    if(map&0b1000):    
+        surface.blit(crystal,(10*w/12, 4*h/8, w/30, h/30))
+    if(map&0b100):    
+        surface.blit(crystal,(9*w/12, 3*h/8, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(9*w/12, 2*h/8, w/30, h/30))
+    if(map&0b1):    
+        surface.blit(crystal,(3*w/5, h/6, w/30, h/30))
+
+
+
+
+
+
+
     
     
     

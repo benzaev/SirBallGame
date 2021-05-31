@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.22
+#version 10.24
 
 #Holds the model
 
@@ -48,7 +48,7 @@ YELLOW=(255,255,0)
 GREY=(34,34,34)
 LGREY=(169,169,169)
 
-#objects that move around are stored here
+#global objects that move around are stored here
 movingObjects=[]
 
 def addMovingObject(object):
@@ -62,6 +62,10 @@ def addMovingObject(object):
 def finishTransfer(transfer):
     global movingObjects
     movingObjects=transfer
+    
+def resetMovingObjects():
+    global movingObjects
+    movingObjects=[]
     
     
     
