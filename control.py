@@ -141,7 +141,7 @@ def fallingDot(x,y,fall,stage,in_jump,in_fall):
     
     yMaxi=YFloor(x,y,stage)
     
-    if (not in_jump and y<yMaxi-2 and not in_fall):
+    if (not in_jump and y<yMaxi-3*h/1000 and not in_fall):
         fall=500
         in_fall=True
     elif(not in_fall):
