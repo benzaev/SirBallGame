@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.24
+#version 10.27
 
 #This blits everything
 
@@ -16,7 +16,7 @@ h= model.h
 surface= model.surface
 
 #projects to screen
-def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeated, xDot, yDot, xWall, wStage, music, gemmap, gems):
+def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap, gems):
     #makes mouse invisible while in the stages
     pygame.mouse.set_visible(False)  
     
@@ -24,31 +24,44 @@ def view(stage, interact, numMess, keys, prevKey, deaths, wall_mad, wall_defeate
     background()
 
     #draws the wall
-    drawWall(stage, wall_mad, xWall, wStage)
+    drawWall(SirBall.stage, wall_mad, xWall, wStage)
     
     #draws all the spikes
-    drawSpikes(stage)
+    drawSpikes(SirBall.stage)
 
     #the stage blocks
-    drawStage(stage)
+    drawStage(SirBall)
    
     #blits character/messages
-    characterBlit(stage, interact,numMess)
+    characterBlit(SirBall.stage, interact,numMess)
 
     #blits gems
-    gemBlit(stage, gemmap)
+    gemBlit(SirBall.stage, gemmap)
 
     #writes #deaths and gems
-    writeBasics(stage,deaths, gems) 
+    writeBasics(SirBall.stage,SirBall.deaths, gems) 
 
     #draws acessories (like arrows and stuff)
-    drawAcessories(stage,wall_mad,xDot,wall_defeated)        
+    drawAcessories(SirBall.stage,wall_mad,SirBall.xDot,wall_defeated) 
 
-    #draws the dot
-    drawDot(xDot,yDot)
+    #draw Lazers
+    drawLazer()
+
+    #draws the dot      
+    drawDot(SirBall)
+    
+    pygame.draw.rect(surface,model.RED,(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25),1) 
+
     
     #music
-    playMusic(wall_mad,music) 
+    #playMusic(wall_mad,music)         
+    
+#cycles through all moving objects and blits lazers to the screen
+def drawLazer():
+    for x in model.movingObjects:
+        if (isinstance(x, stages.Lazer)):
+            x.drawSelf()
+            
 
 #blits background
 def background():
@@ -97,11 +110,12 @@ def messagePrint(size,text,textB,color):
     
 
 #draws the Dot character
-def drawDot(xDot,yDot):
-    pygame.draw.ellipse(surface,model.WHITE,(xDot,yDot,w/20,w/20),0) 
-    
+def drawDot(SirBall):
+    SirBall.paintMeLikeAFrenchGirl()
+        
 #selects which stage to draw then calls a method to actually draw it. Returns all blocks for collisions
-def drawStage(stage):
+def drawStage(SirBall):
+    stage=SirBall.stage
     if stage==1:
         return stages.drawStageOne()
     if stage==2:
@@ -133,7 +147,7 @@ def drawStage(stage):
     if stage==15:
         return stages.drawStageFifteen()
     if stage==16:
-        return stages.drawStageSixteen()
+        return stages.drawStageSixteen(SirBall)
 
         
 def drawSpikes(stage):
@@ -172,9 +186,18 @@ def drawAcessories(stage,wall_mad, xDot,wall_defeated):
         textBounds=(w/2,h/20+h/30)
         messagePrint(w//50,text,textBounds,model.LGREY)
 
-    #blue button
-    if(stage==1 and wall_mad):
+    #blue button and arrows
+    if(stage==1 and wall_mad and not wall_defeated):
         pygame.draw.rect(surface,model.BLUE,(89*w/200+1,22*h/25-h/50+1,2*w/15-w/25-1,h/50-1),0)
+        #draw Arrow to button
+        pygame.draw.rect(surface,model.YELLOW,(97*w/200, 130*h/200, 3*w/200, 20*h/200),0) 
+        pygame.draw.polygon(surface,model.YELLOW,[(95*w/200, 150*h/200),(102*w/200, 150*h/200),(98.5*w/200, 160*h/200)],0)
+    elif (stage==1 and wall_mad and wall_defeated):
+        pygame.draw.rect(surface,model.YELLOW,(80*w/200, 60*h/200, 10*w/200, 4*h/200),0) 
+        pygame.draw.polygon(surface,model.YELLOW,[(90*w/200, 58*h/200),(90*w/200, 66*h/200),(93*w/200, 62*h/200)],0)
+
+
+
         
     #blits door
     if(stage==1 and wall_defeated):

@@ -1,11 +1,11 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.24
+#version 10.27
 
 #moves stuff around
 
-import pygame, display, model, sys, Luis, Marvin
+import pygame, math, display, model, sys, Luis, Marvin
 
 #pygame initialization
 pygame.init()
@@ -14,88 +14,128 @@ w=model.w
 h=model.h
 
 #all moving parts
-def controller(interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, keys, jump, in_jump, in_fall, fall, deaths, numMess, prevKey, music, gemmap, gems):
+def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame):
     #master control
-    if (keys[pygame.K_a] and not keys==prevKey):
-        stage+=1  
-    if (keys[pygame.K_b] and not keys==prevKey):
-        stage-=1
+   # if (keys[pygame.K_a] and not keys==prevKey):
+    #    SirBall.setstage(SirBall.stage+1)  
+     #   model.resetMovingObjects()
+   # if (keys[pygame.K_b] and not keys==prevKey):
+    #    SirBall.setstage(SirBall.stage-1)
+     #   model.resetMovingObjects()
+
     
     music=0
     moveBlocks()
     #if not currently interacting with a character, continue on
     if (not interact):
         #wall mechanics
-        wall_mad,wall_defeated,xWall,wStage, music=wallMechanics(xDot,yDot,xWall,wStage,wall_mad, wall_defeated, stage, music)
+        wall_mad,wall_defeated,xWall,wStage, music=wallMechanics(SirBall,xWall,wStage,wall_mad, wall_defeated, music)
         
         #moving the dot
-        xDot,stage=moveDot(keys,xDot,yDot,stage)  
+        moveDot(keys,SirBall)  
                 
         #does a cute little jump action
-        yDot,jump,in_jump=jumpDot(keys,xDot,yDot,jump,stage,in_jump,in_fall)
-        yDot,fall,in_jump,in_fall=fallingDot(xDot,yDot,fall,stage,in_jump,in_fall)
+        jumpDot(keys,SirBall)
+        fallingDot(SirBall)
         
         #keeps dot on the line
-        yDot=stayOnLine(xDot,yDot,stage,in_jump,in_fall)
+        stayOnLine(SirBall)
         
         #respawn
-        xWall,wStage,xDot,yDot,stage,deaths, wall_defeated=respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated)   
+        xWall,wStage,wall_defeated=respawn(xWall,wStage,wall_mad, wall_defeated, SirBall)   
         
-        gemmap, gems= collectGem(xDot, yDot, stage, gemmap, gems)
+        gemmap, gems= collectGem(SirBall, gemmap, gems)
+        
+        rightToBearArms(SirBall)
+        
+        killEnemy(SirBall)
+        
+        shootLazers(SirBall, frame)
         
     #does interaction
-    numMess, interact, music = characterInteractions(xDot, yDot, numMess, interact, keys, prevKey, stage, music)
+    numMess, interact, music = characterInteractions(SirBall, numMess, interact, keys, prevKey, music)
             
     #checks if goes through a door
-    stage, xDot, yDot, numMess, wall_mad, music= nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music)   
+    numMess, wall_mad, music= nextLevel(SirBall, wall_defeated, numMess, wall_mad, music)   
         
     #allows for test KEYUP
     prevKey=keys
     
-    return interact, xDot, yDot, xWall, wStage, wall_mad, wall_defeated, stage, jump, in_jump, in_fall, fall, deaths, numMess, prevKey, music, gemmap, gems
+    frame+=1
+    
+    return interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame
 
+
+#shoots lazers at SirBall from bananas      x, y, xDot, yDot
+def shootLazers(SirBall, frame):
+    xDot=SirBall.xDot+w/40
+    yDot=SirBall.yDot+w/40
+    for q in model.movingObjects:
+        if (isinstance(q, display.stages.Banana)):
+            if (q.alive and q.lastShot+100<frame):
+                laser=display.stages.Lazer(q.x, q.y, xDot, yDot)
+                model.addMovingObject(laser)
+                q.setLastShot(frame)
+
+
+
+#tests if SirBall killed an enemy 
+def killEnemy(SirBall):
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+    for x in model.movingObjects:
+        if (isinstance(x, display.stages.Banana)):
+            if(x.getBox().colliderect(ballRect) and x.alive):
+                if(SirBall.armed):
+                    x.setAlive(False)                
+                
+                
 #moves all the movable blocks
 def moveBlocks():
     for x in model.movingObjects:
         x.moveSelf()
-
-#checks if Sir Ball went through a door
-def nextLevel(stage, wall_defeated, xDot, yDot, numMess, wall_mad, music):
+        
+def rightToBearArms(SirBall):
+    if(SirBall.stage==16 and SirBall.xDot+w/40>w//10 and SirBall.xDot-w/30<w//10 and SirBall.yDot<4*h/10 and SirBall.yDot>4*h/10-h/10):
+        SirBall.setarmed(True)
+    
+#checks if Sir Ball went through a door    
+def nextLevel(SirBall, wall_defeated, numMess, wall_mad, music):
     #goes through door on first stage
-    if(stage==1 and wall_defeated and (xDot)>=49*w/100 and (xDot<=49*w/100+w/20) and (yDot<=2*h/5)):
-        stage=6
-        xDot=w/100
-        yDot=0
+    if(SirBall.stage==1 and wall_defeated and (SirBall.xDot)>=49*w/100 and (SirBall.xDot<=49*w/100+w/20) and (SirBall.yDot<=2*h/5)):
+        SirBall.setstage(6)
+        SirBall.setxDot(w/100)
+        SirBall.setyDot(0)
         numMess=0
         wall_mad=False
         music=1
     #goes through door on stage 9
     door9=pygame.Rect(9*w/10, h/2-h/3, w/10, h/3)
-    if(stage==9 and door9.collidepoint(xDot+w/40,yDot+w/40)):
-        stage=10
-        xDot=w/100
-        yDot=14*h/30-h/20
+    if(SirBall.stage==9 and door9.collidepoint(SirBall.xDot+w/40,SirBall.yDot+w/40)):
+        SirBall.setstage(10)
+        SirBall.setxDot(w/100)
+        SirBall.setyDot(14*h/30-h/20)
         numMess=0
     #goes through door on stage 15
     door15=pygame.Rect(17*w/20, h//5,w//12, h//5)
-    if(stage==15 and door15.collidepoint(xDot+w/40,yDot+w/40)):
-        stage=16
-        xDot=w/100
-        yDot=h/2
+    if(SirBall.stage==15 and door15.collidepoint(SirBall.xDot+w/40,SirBall.yDot+w/40)):
+        SirBall.setstage(16)
+        SirBall.setxDot(w/100)
+        SirBall.setyDot(h/2)
         numMess=0
         model.resetMovingObjects()
+
     
-    return stage, xDot, yDot, numMess, wall_mad, music
+    return numMess, wall_mad, music
 
 #starts, moves, and stops wall
-def wallMechanics (xDot, yDot,xWall,wStage,wall_mad, wall_defeated, stage, music):
+def wallMechanics (SirBall,xWall,wStage,wall_mad, wall_defeated, music):
     #where the stage 1 button is
     block=pygame.Rect(89*w/200,22*h/25-h/50,2*w/15-w/25,h/50+1)    
     #presses the button to stop the wall
-    if(stage==1 and wall_mad and not wall_defeated and block.collidepoint(xDot+w/40,yDot+w/20)):
+    if(SirBall.stage==1 and wall_mad and not wall_defeated and block.collidepoint(SirBall.xDot+w/40,SirBall.yDot+w/20)):
         wall_defeated=True
     #activates the stage 5 wall
-    if(not wall_defeated and not wall_mad and stage==5 and xDot>=12*w/20):
+    if(not wall_defeated and not wall_mad and SirBall.stage==5 and SirBall.xDot>=12*w/20):
         wall_mad=True
         music=2
     #moves the wall
@@ -110,67 +150,66 @@ def wallMechanics (xDot, yDot,xWall,wStage,wall_mad, wall_defeated, stage, music
 
     
 #perform cute jump animation, only for upward motion
-def jumpDot(keys,xDot,yDot,jump,stage,in_jump,in_fall):
+def jumpDot(keys,SirBall):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
+    stage=SirBall.stage
+    in_jump=SirBall.in_jump
+    in_fall=SirBall.in_fall
+    jump=SirBall.jump
+
     #where is the roof?
-    ceiling=YCeiling(xDot, yDot, stage)
+    ceiling=YCeiling(SirBall)
     
     #if not currently jumping and you push space
     if (keys[pygame.K_SPACE] and not in_jump and not in_fall):
-        in_jump=True
-        jump=1000
+        SirBall.setin_jump(True)
+        SirBall.setjump(1000)
         
-    #if not jumping, do nothing
-    if (in_jump is False):
-        return yDot,jump,in_jump
-    
-    #if going up, don't hit ceiling
-    if (jump<=1000 and jump>500):
-        yDot-=((jump-500)**2)*h/5700000
-        if (yDot<ceiling):
-            yDot=ceiling
-            in_jump=False
-    else:
-        in_jump=False
-        
-    if(in_jump):
-        jump-=25
-    return yDot,jump,in_jump
+    #if jumping currently, continue
+    if (in_jump):
+        #if going up, don't hit ceiling
+        if (jump<=1000 and jump>500):
+            SirBall.setyDot(yDot-((jump-500)**2)*h/5700000)
+            if (SirBall.yDot<ceiling):
+                SirBall.setyDot(ceiling)
+                SirBall.setin_jump(False)
+        else:
+            SirBall.setin_jump(False)
+            
+        if(in_jump):
+            SirBall.setjump(jump-25)
     
 #if the dot isn't on the groun, it falls to the ground
-def fallingDot(x,y,fall,stage,in_jump,in_fall):
+def fallingDot(SirBall):
     
-    yMaxi=YFloor(x,y,stage)
+    yMaxi=YFloor(SirBall)
     
-    if (not in_jump and y<yMaxi-3*h/1000 and not in_fall):
-        fall=500
-        in_fall=True
-    elif(not in_fall):
-        return y,0,in_jump,in_fall
-    
-    y+=(h/8000000)*(fall-500)**2
-    if (y>=yMaxi):
-        y=yMaxi
-        in_fall=False
-       
-    fall-=25
-
-    return y,fall,in_jump,in_fall        
-    
+    if (not SirBall.in_jump and SirBall.yDot<yMaxi-3*h/1000 and not SirBall.in_fall):
+        SirBall.setfall(500)
+        SirBall.setin_fall(True)
+    #if Sir Ball is falling, make him fall
+    if(SirBall.in_fall):
+        SirBall.setyDot(SirBall.yDot+(h/8000000)*(SirBall.fall-500)**2)
+        if (SirBall.yDot>=yMaxi):
+            SirBall.setyDot(yMaxi)
+            SirBall.setin_fall(False)
+           
+        SirBall.setfall(SirBall.fall-25)  
     
     
 #stay on lines methods here
-def stayOnLine(xDot,yDot,stage,in_jump, in_fall):
-    if (in_jump or in_fall):
-        return yDot
-    return YFloor(xDot,yDot,stage) 
+def stayOnLine(SirBall):
+    if (not SirBall.in_jump and not SirBall.in_fall):
+        SirBall.setyDot(YFloor(SirBall))
     
 #returns the y value of the first floor below the ball
-def YFloor(xDot,yDot,stage):
+def YFloor(SirBall):
     #center of the Dot
-    xDot+=w/40   
-    yDot+=w/40
+    xDot=SirBall.xDot+w/40   
+    yDot=SirBall.yDot+w/40
     maxi=2*h
-    blocks=display.drawStage(stage)
+    blocks=display.drawStage(SirBall)
     for x in blocks:
         if(x.left<=xDot and x.right>=xDot):
             if(x.top<maxi and x.top>=yDot):
@@ -178,12 +217,12 @@ def YFloor(xDot,yDot,stage):
     return maxi-w/20
 
 #returns the lowest platform above ball    
-def YCeiling (xDot, yDot, stage):
+def YCeiling (SirBall):
     #center of Dot  
-    xDot+=w/40
-    yDot+=w/40
+    xDot=SirBall.xDot+w/40
+    yDot=SirBall.yDot+w/40
     ceiling=0
-    blocks=display.drawStage(stage)
+    blocks=display.drawStage(SirBall)
     for x in blocks:
         if(x.left<=xDot and x.right>=xDot):
             if(x.bottom>ceiling and x.bottom<=yDot):
@@ -192,110 +231,128 @@ def YCeiling (xDot, yDot, stage):
 
     
 #moves dot left or right
-def moveDot(keys,xDot,yDot,stage):
-    if keys[pygame.K_RIGHT]:
-        if (not moveRight(xDot,yDot,stage)):
-            return xDot,stage
+def moveDot(keys,SirBall):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
+    stage=SirBall.stage
+    
+    if (keys[pygame.K_RIGHT] and moveRight(SirBall)):
         if (xDot+w/20)<w:
-            xDot+=w/200
+            SirBall.setxDot(xDot+w/200)
         else:
-            xDot=0
-            stage+=1
-    if keys[pygame.K_LEFT]:
-        if (not moveLeft(xDot,yDot,stage)):
-            return xDot,stage
+            SirBall.setxDot(0)
+            SirBall.setstage(stage+1)
+            model.resetMovingObjects()
+    if (keys[pygame.K_LEFT] and moveLeft(SirBall)):
         if (xDot)>0:
-            xDot-=w/200
+            SirBall.setxDot(xDot-w/200)
         else:
             if (stage!=1):
-                xDot=w-w/20
-                stage-=1                
-    return xDot,stage
+                SirBall.setxDot(w-w/20)
+                SirBall.setstage(stage-1)
+                model.resetMovingObjects()
+
         
 
 
 #These check if there is an object blocking them from moving in a direction
-def moveLeft(xDot,yDot,stage):    
+def moveLeft(SirBall):    
     #if by next move it would touch the wall, return False
-    blocks=display.drawStage(stage)
-    player= pygame.Rect(xDot,yDot+w/100,w/20-w/40,w/20-w/50)
+    blocks=display.drawStage(SirBall)
+    player= pygame.Rect(SirBall.xDot,SirBall.yDot+w/100,w/20-w/40,w/20-w/50)
     for x in blocks:
         if (x.colliderect(player)):
             return False
     return True  
     
-def moveRight(xDot,yDot,stage):
+def moveRight(SirBall):
     #if by next move it would touch the wall, return False
-    blocks=display.drawStage(stage)
-    player= pygame.Rect(xDot+w/40,yDot+w/100,w/20-w/40,w/20-w/50)
+    blocks=display.drawStage(SirBall)
+    player= pygame.Rect(SirBall.xDot+w/40,SirBall.yDot+w/100,w/20-w/40,w/20-w/50)
     for x in blocks:
         if (x.colliderect(player)):
             return False
     return True
        
-#checks if hit bottom, ran into wall, or hit spikes
-def respawn(xWall,wStage,xDot,yDot,stage,deaths,wall_mad, wall_defeated):
+#checks if hit bottom, ran into wall, or hit spikes 
+
+def respawn(xWall,wStage,wall_mad, wall_defeated, SirBall):
     #hits floor
-    if (yDot+w/20>=h):
-        if(wall_mad):
-            xDot=7*w/8
-            resetY=0
-            deaths+=1
-            while(True):
-                yDot=YFloor(xDot,resetY,stage)
-                if(yDot>=h):
-                    xDot-=w/100
-                    resetY-=h/50
-                else:
-                    break
-        else:   
-            xDot=w/8
-            deaths+=1
-            resetY=h/2
-            while(True):
-                yDot=YFloor(xDot,resetY,stage)
-                if(yDot>=h):
-                    xDot-=w/100
-                    resetY-=h/50
-                else:
-                    break
+    if (SirBall.yDot+w/20>=h):
+        resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+
     #hits wall
-    if(wall_mad and wStage==stage and xWall<=xDot+w/20):
-        stage=5
-        xDot=w/8
-        deaths+=1
+    if(wall_mad and wStage==SirBall.stage and xWall<=SirBall.xDot+w/20):
+        xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, True)
+
+    #hits spikes
+    spikes=display.drawSpikes(SirBall.stage)
+    player= pygame.Rect(SirBall.xDot,SirBall.yDot+w/100,w/20,3*w/100)
+    for x in spikes:
+        if (x.colliderect(player)):
+            xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+
+
+    #if hits the enemy while unarmed
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
+    for x in model.movingObjects:
+        if (isinstance(x, display.stages.Banana)):
+            if(x.getBox().colliderect(ballRect) and x.alive):
+                if(not SirBall.armed):
+                    xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+
+                            
+    #if SirBall is hit by a laser           
+    for laser in model.movingObjects:
+        if (isinstance(laser, display.stages.Lazer)):
+            if(ballRect.collidepoint(laser.point1) or ballRect.collidepoint(laser.point2) or ballRect.collidepoint(laser.point3) or ballRect.collidepoint(laser.point4)):
+                xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+                laser.x=-100
+                laser.deltaX=0
+                    
+    return xWall,wStage,wall_defeated
+    
+#if Sir Ball has died, reset all the values here
+def resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, hit_wall):
+    if(hit_wall):
+        SirBall.setstage(5)
+        SirBall.setxDot(w/8)
+        SirBall.setdeaths(SirBall.deaths+1)
         xWall=w
         wStage=5
         wall_defeated=False
         resetY=h/2
-        while(True):
-            yDot=YFloor(xDot,resetY,stage)
-            if(yDot>=h):
-                xDot-=w/100
-                resetY-=h/50
-            else:
-                break
-    #hits spikes
-    spikes=display.drawSpikes(stage)
-    player= pygame.Rect(xDot,yDot+w/100,w/20,3*w/100)
-    for x in spikes:
-        if (x.colliderect(player)):
-            xDot=w/15
-            deaths+=1
-            resetY=h/3
-            while(True):
-                yDot=YFloor(xDot,resetY,stage)
-                if(yDot>=h):
-                    xDot-=w/100
-                    resetY-=h/50
-                else:
-                    break    
-                    
-    return xWall,wStage,xDot,yDot,stage,deaths, wall_defeated
+        SirBall.setyDot(resetY)
+    elif (wall_mad):
+        SirBall.setxDot(7*w/8)
+        SirBall.setdeaths(SirBall.deaths+1)
+        resetY=0
+        SirBall.setyDot(resetY)
+    else:
+        SirBall.setxDot(0)
+        SirBall.setdeaths(SirBall.deaths+1)
+        resetY=h/2
+        SirBall.setyDot(resetY)
+        
+    while(True):
+        SirBall.setyDot(YFloor(SirBall))
+        if(SirBall.yDot>=h):
+            if(SirBall.xDot>w/100):
+                SirBall.setxDot(SirBall.xDot-w/100)
+            resetY-=h/50
+            SirBall.setyDot(resetY)
+        else:
+            break
+                
+    return xWall, wStage, wall_defeated
+
     
     
 
-def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage, music):
+def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
+    stage=SirBall.stage
     numMessPrev=numMess
     #if gets close to a character, begin interaction
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
@@ -346,29 +403,30 @@ def characterInteractions (xDot, yDot, numMess, interact, keys, prevKey, stage, 
     return numMess, interact, music
     
 #collects gems for Sir Ball
-def collectGem(xDot, yDot, stage, gemmap, gems):  
+def collectGem(SirBall, gemmap, gems):  
+    stage=SirBall.stage
     #stage 6 gems
     if (stage==6):
-        gemmap, gems=stage6Gems(xDot,yDot, gemmap, gems)
+        gemmap, gems=stage6Gems(SirBall, gemmap, gems)
     #stage 7 gems
     if (stage==7):
-        gemmap, gems=stage7Gems(xDot,yDot, gemmap, gems)    
+        gemmap, gems=stage7Gems(SirBall, gemmap, gems)    
     if (stage==8):
-        gemmap, gems=stage8Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage8Gems(SirBall, gemmap, gems)
     if (stage==9):
-        gemmap, gems=stage9Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage9Gems(SirBall, gemmap, gems)
     if (stage==10):
-        gemmap, gems=stage10Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage10Gems(SirBall, gemmap, gems)
     if (stage==11):
-        gemmap, gems=stage11Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage11Gems(SirBall, gemmap, gems)
     if (stage==12):
-        gemmap, gems=stage12Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage12Gems(SirBall, gemmap, gems)
     if (stage==13):
-        gemmap, gems=stage13Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage13Gems(SirBall, gemmap, gems)
     if (stage==14):
-        gemmap, gems=stage14Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage14Gems(SirBall, gemmap, gems)
     if(stage==15):
-        gemmap, gems=stage15Gems(xDot, yDot, gemmap, gems)
+        gemmap, gems=stage15Gems(SirBall, gemmap, gems)
 
 
     
@@ -376,10 +434,12 @@ def collectGem(xDot, yDot, stage, gemmap, gems):
         
     return gemmap, gems    
     
-def stage6Gems(xDot, yDot, gemmap, gems):
+def stage6Gems(SirBall, gemmap, gems):
     map=gemmap[0]
     gem1=pygame.Rect(3*w/5,h/5,w/20,h/20)
     gem2=pygame.Rect(9.5*w/10,h/5,w/20,h/20)
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     #first gem
     if (map&10 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
         map=map&1
@@ -393,7 +453,9 @@ def stage6Gems(xDot, yDot, gemmap, gems):
         
     return gemmap, gems
 
-def stage7Gems(xDot,yDot, gemmap, gems):
+def stage7Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[1]
     gem1=pygame.Rect(3*w/12,28*h/40,w/20,h/20)
     gem2=pygame.Rect(86*w/120,84*h/120,w/20,h/20)
@@ -416,7 +478,9 @@ def stage7Gems(xDot,yDot, gemmap, gems):
         
     return gemmap, gems
 
-def stage8Gems(xDot,yDot, gemmap, gems):
+def stage8Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[2]
     gem1=pygame.Rect(12*w/30-w/30, 14*h/30-h/20, w/30, h/20)
     gem2=pygame.Rect(12*w/30, 14*h/30-h/20, w/30, h/20)
@@ -452,7 +516,9 @@ def stage8Gems(xDot,yDot, gemmap, gems):
         
     return gemmap, gems
 
-def stage9Gems(xDot,yDot, gemmap, gems):
+def stage9Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[3]
     gem1=pygame.Rect(w/4+w/10, h/6-h/20, w/30, h/20)
     gem2=pygame.Rect(w/2, h/6-h/20, w/30, h/20)
@@ -511,7 +577,9 @@ def stage9Gems(xDot,yDot, gemmap, gems):
         
     return gemmap, gems
     
-def stage10Gems(xDot, yDot, gemmap, gems):
+def stage10Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[4]
     gem1=pygame.Rect(w/50, 9*h/10-h/20, w/30, h/20)          
     gem2=pygame.Rect(19*w/20, 9*h/10-h/20, w/30, h/20) 
@@ -528,7 +596,9 @@ def stage10Gems(xDot, yDot, gemmap, gems):
         
     return gemmap, gems
     
-def stage11Gems(xDot, yDot, gemmap, gems):
+def stage11Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[5]
     gem1=pygame.Rect(5*w/12-4*w/15, 11*h/30-h/18, w/30, h/30) 
     gem2=pygame.Rect(5*w/12-2*w/15, 11*h/30-h/18, w/30, h/30) 
@@ -567,7 +637,9 @@ def stage11Gems(xDot, yDot, gemmap, gems):
     return gemmap, gems
     
     
-def stage12Gems(xDot, yDot, gemmap, gems):
+def stage12Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[6]
     gem1=pygame.Rect(2*w/6, h/10, w/30, h/30)          
     gem2=pygame.Rect(3*w/6, h/10, w/30, h/30) 
@@ -604,7 +676,9 @@ def stage12Gems(xDot, yDot, gemmap, gems):
         
     return gemmap, gems   
 
-def stage13Gems(xDot, yDot, gemmap, gems):
+def stage13Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[7]
     gem1=pygame.Rect(w/90, 3*h/12-h/20, w/30, h/30)          
     gem2=pygame.Rect(w/90+w/20, 3*h/12-h/20, w/30, h/30) 
@@ -624,7 +698,9 @@ def stage13Gems(xDot, yDot, gemmap, gems):
         
     return gemmap, gems     
 
-def stage14Gems(xDot, yDot, gemmap, gems):
+def stage14Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[8]
     gem1=pygame.Rect(w/4, h/2-h/20, w/30, h/30)          
     gem2=pygame.Rect(w/4+3*w/20, 6*h/10, w/30, h/30) 
@@ -654,7 +730,9 @@ def stage14Gems(xDot, yDot, gemmap, gems):
 
     return gemmap, gems  
     
-def stage15Gems(xDot, yDot, gemmap, gems):
+def stage15Gems(SirBall, gemmap, gems):
+    xDot=SirBall.xDot
+    yDot=SirBall.yDot
     map=gemmap[9]
     gem1=pygame.Rect(9*w/12, 5*h/8, w/30, h/30)          
     gem2=pygame.Rect(10*w/12, 4*h/8, w/30, h/30) 
@@ -684,15 +762,7 @@ def stage15Gems(xDot, yDot, gemmap, gems):
 
     return gemmap, gems 
 
-    
-    
-#gets the two MSD of a num
-#returns a two digit int
-def getTwoMostSig(num):
-    factor=1
-    while (num//factor>99):
-        facotr*=10
-    return(num//factor)
+
 
 
 

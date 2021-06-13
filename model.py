@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.24
+#version 10.27
 
 #Holds the model
 
@@ -36,6 +36,19 @@ spikeL=pygame.transform.scale(spikeL,(w//20,w//20))
 
 spikeR=pygame.image.load("Images/spikeR.png").convert_alpha()
 spikeR=pygame.transform.scale(spikeR,(w//20,w//20))
+
+Vsword=pygame.image.load("Images/Vsword.png").convert_alpha()
+Vsword=pygame.transform.scale(Vsword,(w//15,w//15))
+
+Rsword=pygame.image.load("Images/Rsword.png").convert_alpha()
+Rsword=pygame.transform.scale(Rsword,(w//13,w//13))
+
+Lsword=pygame.image.load("Images/Lsword.png").convert_alpha()
+Lsword=pygame.transform.scale(Lsword,(w//13,w//13))
+
+EvilBanana=pygame.image.load("Images/lessInnocentBanana.png").convert_alpha()
+EvilBanana=pygame.transform.scale(EvilBanana,(w//12,h//12))
+
 
 #Color constants
 BLACK = (  0,   0,   0)

@@ -1,11 +1,11 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.24
+#version 10.27
 
-#Holds the stages and moving blocks class
+#Holds the stages and has a couple auxillary classes for little objects
 
-import pygame, model
+import pygame, model, math
 
 #pygame initialization
 pygame.init()
@@ -516,17 +516,17 @@ def drawStageEleven():
     if(model.movingObjects==[]):
         block1=movingObject(0, 1333, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block1)
-    blocks.append(model.movingObjects[0].drawBlock())   
+    blocks.append(model.movingObjects[0].drawSelf())   
     #moving platform 2
     if(len(model.movingObjects)==1):
         block2=movingObject(666, 1333, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block2)
-    blocks.append(model.movingObjects[1].drawBlock())   
+    blocks.append(model.movingObjects[1].drawSelf())   
     #moving platform 3
     if(len(model.movingObjects)==2):
         block3=movingObject(1333, 1333, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block3)
-    blocks.append(model.movingObjects[2].drawBlock())       
+    blocks.append(model.movingObjects[2].drawSelf())       
     #step -four 
     pygame.draw.rect(surface, WHITE,(5*w/12-4*w/15, 11*h/30, w/30, h/60), 1)
     blocks.append(pygame.Rect(5*w/12-4*w/15, 11*h/30, w/30, h/60))
@@ -627,68 +627,64 @@ def drawStageElevenSpikes():
 
 def drawStageTwelve():
     #contains all the blocks so I can test colides
-    blocks=[]   
+    blocks=[]  
+     
+    #stationary blocks
     #first
     pygame.draw.rect(surface,WHITE,(0,9*h/10,w/6,h/5+1),1) 
-    blocks.append(pygame.Rect(0,9*h/10,w/6,h/5+1)) 
-    #moving vertical row 1
-    if(len(model.movingObjects)==3):
-        block=movingObject(500, 200, w/20, h/60, WHITE, 1800, 2)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[3].drawBlock())   
-    if(len(model.movingObjects)==4):
-        block=movingObject(500, 800, w/20, h/60, WHITE, 1800, 2)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[4].drawBlock())  
-    if(len(model.movingObjects)==5):
-        block=movingObject(500, 1400, w/20, h/60, WHITE, 1800, 2)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[5].drawBlock())
-    #moving horizontal
-    if(len(model.movingObjects)==6):
-        block=movingObject(0, 300, w/20, h/60, WHITE, 2000, 1)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[6].drawBlock())   
-    if(len(model.movingObjects)==7):
-        block=movingObject(666, 300, w/20, h/60, WHITE, 2000, 1)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[7].drawBlock())  
-    if(len(model.movingObjects)==8):
-        block=movingObject(1333, 300, w/20, h/60, WHITE, 2000, 1)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[8].drawBlock()) 
-    #moving vertical row 2
-    if(len(model.movingObjects)==9):
-        block=movingObject(1500, 400, w/20, h/60, WHITE, 1800, 0)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[9].drawBlock())   
-    if(len(model.movingObjects)==10):
-        block=movingObject(1500, 1000, w/20, h/60, WHITE, 1800, 0)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[10].drawBlock())  
-    if(len(model.movingObjects)==11):
-        block=movingObject(1500, 1600, w/20, h/60, WHITE, 1800, 0)
-        model.addMovingObject(block)
-    blocks.append(model.movingObjects[11].drawBlock())
+    blocks.append(pygame.Rect(0,9*h/10,w/6,h/5+1))
     #spikey wall
     pygame.draw.rect(surface, WHITE,(99*w/100, 0, w/16+1, h/2), 1)
     blocks.append(pygame.Rect(99*w/100, 0, w/16+1, h/2))
     #end block
     pygame.draw.rect(surface,WHITE,(5*w/6+w/20-1,9*h/10,w/6,h/5+1),1) 
     blocks.append(pygame.Rect(5*w/6+w/20-1,9*h/10,w/6,h/5+1)) 
-    #middle blocks for gems
-    if(len(model.movingObjects)==12):
+    
+    #moving blocks
+    #moving vertical row 1
+    if(model.movingObjects==[]):
+        block=movingObject(500, 200, w/20, h/60, WHITE, 1800, 2)
+        model.addMovingObject(block)
+        block=movingObject(500, 800, w/20, h/60, WHITE, 1800, 2)
+        model.addMovingObject(block)
+        block=movingObject(500, 1400, w/20, h/60, WHITE, 1800, 2)
+        model.addMovingObject(block)
+        #moving horizontal
+        block=movingObject(0, 300, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block)
+        block=movingObject(666, 300, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block)
+        block=movingObject(1333, 300, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block)
+        #moving vertical row 2
+        block=movingObject(1500, 400, w/20, h/60, WHITE, 1800, 0)
+        model.addMovingObject(block)
+        block=movingObject(1500, 1000, w/20, h/60, WHITE, 1800, 0)
+        model.addMovingObject(block)
+        block=movingObject(1500, 1600, w/20, h/60, WHITE, 1800, 0)
+        model.addMovingObject(block)
+        #middle blocks for gems
         block=movingObject(300, 560, w/20, h/60, WHITE, 1200, 1)
         model.addMovingObject(block)
-    blocks.append(model.movingObjects[12].drawBlock())
-    if(len(model.movingObjects)==13):
         block=movingObject(700, 560, w/20, h/60, WHITE, 1200, 1)
         model.addMovingObject(block)
-    blocks.append(model.movingObjects[13].drawBlock())
-    if(len(model.movingObjects)==14):
         block=movingObject(1100, 560, w/20, h/60, WHITE, 1200, 1)
         model.addMovingObject(block)
-    blocks.append(model.movingObjects[14].drawBlock())
+    
+    
+    blocks.append(model.movingObjects[0].drawSelf())   
+    blocks.append(model.movingObjects[1].drawSelf())  
+    blocks.append(model.movingObjects[2].drawSelf())
+    blocks.append(model.movingObjects[3].drawSelf())   
+    blocks.append(model.movingObjects[4].drawSelf())  
+    blocks.append(model.movingObjects[5].drawSelf()) 
+    blocks.append(model.movingObjects[6].drawSelf())   
+    blocks.append(model.movingObjects[7].drawSelf())  
+    blocks.append(model.movingObjects[8].drawSelf())
+    blocks.append(model.movingObjects[9].drawSelf())
+    blocks.append(model.movingObjects[10].drawSelf())
+    blocks.append(model.movingObjects[11].drawSelf())
+
 
     return blocks
 
@@ -732,9 +728,12 @@ def drawStageThirteen():
     #gems go here
     pygame.draw.rect(surface,WHITE,(0,3*h/12,w/6,h/30),1) 
     blocks.append(pygame.Rect(0,3*h/12,w/6,h/30))
+    #end block
+    pygame.draw.rect(surface,WHITE,(10*w/11,h/2,w/5,h/60),1) 
+    blocks.append(pygame.Rect(10*w/11,h/2,w/5,h/60)) 
     
     #if need to instantiate moving objects
-    if(len(model.movingObjects)==15):
+    if(model.movingObjects==[]):
         #moves back and fourth
         block=movingObject(500, 1800, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block)
@@ -770,37 +769,32 @@ def drawStageThirteen():
         model.addMovingObject(block)
         
     #bottom oscillating block
-    if(model.movingObjects[15].x>800):
-        model.movingObjects[15].setDirection(3)
-    elif(model.movingObjects[15].x<340):
-        model.movingObjects[15].setDirection(1)
+    if(model.movingObjects[0].x>800):
+        model.movingObjects[0].setDirection(3)
+    elif(model.movingObjects[0].x<340):
+        model.movingObjects[0].setDirection(1)
     
     #top oscillating block
-    if(model.movingObjects[28].x>800):
-        model.movingObjects[28].setDirection(3)
-    elif(model.movingObjects[28].x<340):
-        model.movingObjects[28].setDirection(1)
+    if(model.movingObjects[13].x>800):
+        model.movingObjects[13].setDirection(3)
+    elif(model.movingObjects[13].x<340):
+        model.movingObjects[13].setDirection(1)
 
     #draws the blocks
-    blocks.append(model.movingObjects[15].drawBlock())
-    blocks.append(model.movingObjects[16].drawBlock())   
-    blocks.append(model.movingObjects[17].drawBlock())  
-    blocks.append(model.movingObjects[18].drawBlock())
-    blocks.append(model.movingObjects[19].drawBlock())
-    blocks.append(model.movingObjects[20].drawBlock())
-    blocks.append(model.movingObjects[21].drawBlock())
-    blocks.append(model.movingObjects[22].drawBlock())
-    blocks.append(model.movingObjects[23].drawBlock())
-    blocks.append(model.movingObjects[24].drawBlock())   
-    blocks.append(model.movingObjects[25].drawBlock())  
-    blocks.append(model.movingObjects[26].drawBlock())
-    blocks.append(model.movingObjects[27].drawBlock())
-    blocks.append(model.movingObjects[28].drawBlock())
-
-    
-    #end block
-    pygame.draw.rect(surface,WHITE,(10*w/11,h/2,w/5,h/60),1) 
-    blocks.append(pygame.Rect(10*w/11,h/2,w/5,h/60)) 
+    blocks.append(model.movingObjects[0].drawSelf())
+    blocks.append(model.movingObjects[1].drawSelf())   
+    blocks.append(model.movingObjects[2].drawSelf())  
+    blocks.append(model.movingObjects[3].drawSelf())
+    blocks.append(model.movingObjects[4].drawSelf())
+    blocks.append(model.movingObjects[5].drawSelf())
+    blocks.append(model.movingObjects[6].drawSelf())
+    blocks.append(model.movingObjects[7].drawSelf())
+    blocks.append(model.movingObjects[8].drawSelf())
+    blocks.append(model.movingObjects[9].drawSelf())   
+    blocks.append(model.movingObjects[10].drawSelf())  
+    blocks.append(model.movingObjects[11].drawSelf())
+    blocks.append(model.movingObjects[12].drawSelf())
+    blocks.append(model.movingObjects[13].drawSelf())
 
     return blocks
     
@@ -855,7 +849,7 @@ def drawStageFourteen():
     blocks.append(pygame.Rect(w/4+6*w/10,h/2,w/30,h/60))
     
     #if need to instantiate the moving blocks
-    if(len(model.movingObjects)==29):
+    if(model.movingObjects==[]):
         #moves in a square
         block=movingObject(200, 200, w/15, h/60, WHITE, 1500, 2)
         model.addMovingObject(block)
@@ -863,28 +857,28 @@ def drawStageFourteen():
         model.addMovingObject(block)
                         
     #move it in a square
-    if(model.movingObjects[29].y==1400 and model.movingObjects[29].x==200):
-        model.movingObjects[29].setDirection(1)
-    elif(model.movingObjects[29].y==1400 and model.movingObjects[29].x==1400):
-        model.movingObjects[29].setDirection(0)
-    elif(model.movingObjects[29].y==200 and model.movingObjects[29].x==1400):
-        model.movingObjects[29].setDirection(3)
-    elif(model.movingObjects[29].y==200 and model.movingObjects[29].x==200):
-        model.movingObjects[29].setDirection(2)
+    if(model.movingObjects[0].y==1400 and model.movingObjects[0].x==200):
+        model.movingObjects[0].setDirection(1)
+    elif(model.movingObjects[0].y==1400 and model.movingObjects[0].x==1400):
+        model.movingObjects[0].setDirection(0)
+    elif(model.movingObjects[0].y==200 and model.movingObjects[0].x==1400):
+        model.movingObjects[0].setDirection(3)
+    elif(model.movingObjects[0].y==200 and model.movingObjects[0].x==200):
+        model.movingObjects[0].setDirection(2)
     
     #same thing for the second one
-    if(model.movingObjects[30].y==1400 and model.movingObjects[30].x==200):
-        model.movingObjects[30].setDirection(1)
-    elif(model.movingObjects[30].y==1400 and model.movingObjects[30].x==1400):
-        model.movingObjects[30].setDirection(0)
-    elif(model.movingObjects[30].y==200 and model.movingObjects[30].x==1400):
-        model.movingObjects[30].setDirection(3)
-    elif(model.movingObjects[30].y==200 and model.movingObjects[30].x==200):
-        model.movingObjects[30].setDirection(2)
+    if(model.movingObjects[1].y==1400 and model.movingObjects[1].x==200):
+        model.movingObjects[1].setDirection(1)
+    elif(model.movingObjects[1].y==1400 and model.movingObjects[1].x==1400):
+        model.movingObjects[1].setDirection(0)
+    elif(model.movingObjects[1].y==200 and model.movingObjects[1].x==1400):
+        model.movingObjects[1].setDirection(3)
+    elif(model.movingObjects[1].y==200 and model.movingObjects[1].x==200):
+        model.movingObjects[1].setDirection(2)
     
     #draws the block
-    blocks.append(model.movingObjects[29].drawBlock())
-    blocks.append(model.movingObjects[30].drawBlock())
+    blocks.append(model.movingObjects[0].drawSelf())
+    blocks.append(model.movingObjects[1].drawSelf())
 
     return blocks
     
@@ -898,7 +892,7 @@ def drawStageFourteenSpikes():
     spikes=[] 
     
     #initalize moving spike
-    if(len(model.movingObjects)==31):
+    if(len(model.movingObjects)==2):
         #moves in a square
         sharp=movingObject(600, 1090, w/20, h/20, 0, 2500, 1)
         model.addMovingObject(sharp)
@@ -911,7 +905,7 @@ def drawStageFourteenSpikes():
         
         
         
-    for x in range(31, 35):
+    for x in range(2, 6):
         #make spikes goes back and forth
         if(model.movingObjects[x].x==2152 and model.movingObjects[x].y==1090):
             model.movingObjects[x].setDirection(2)
@@ -928,10 +922,10 @@ def drawStageFourteenSpikes():
             model.movingObjects[x].setType(0)
         
     #blits moving spike
-    spikes.append(model.movingObjects[31].drawSpike())
-    spikes.append(model.movingObjects[32].drawSpike())
-    spikes.append(model.movingObjects[33].drawSpike())
-    spikes.append(model.movingObjects[34].drawSpike())
+    spikes.append(model.movingObjects[2].drawSpike())
+    spikes.append(model.movingObjects[3].drawSpike())
+    spikes.append(model.movingObjects[4].drawSpike())
+    spikes.append(model.movingObjects[5].drawSpike())
 
         
     #roof spikes
@@ -954,7 +948,7 @@ def drawStageFifteen():
     blocks.append(pygame.Rect(0,h/3,w/10,h/60))    
     
     #initalize moving blocks
-    if(len(model.movingObjects)==35):
+    if(model.movingObjects==[]):
         #back and fourth
         block=movingObject(500, 800, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block)
@@ -981,23 +975,23 @@ def drawStageFifteen():
         
         
     #top oscillating block
-    if(model.movingObjects[35].x>800):
-        model.movingObjects[35].setDirection(3)
-    elif(model.movingObjects[35].x<340):
-        model.movingObjects[35].setDirection(1)
+    if(model.movingObjects[0].x>800):
+        model.movingObjects[0].setDirection(3)
+    elif(model.movingObjects[0].x<340):
+        model.movingObjects[0].setDirection(1)
     #up down spike carrier
-    if(model.movingObjects[41].y<200):
-        model.movingObjects[41].setDirection(2)
-    elif(model.movingObjects[41].y>500):
-        model.movingObjects[41].setDirection(0)
-    if(model.movingObjects[42].y<1500):
-        model.movingObjects[42].setDirection(2)
-    elif(model.movingObjects[42].y>1800):
-        model.movingObjects[42].setDirection(0)
+    if(model.movingObjects[6].y<200):
+        model.movingObjects[6].setDirection(2)
+    elif(model.movingObjects[6].y>500):
+        model.movingObjects[6].setDirection(0)
+    if(model.movingObjects[7].y<1500):
+        model.movingObjects[7].setDirection(2)
+    elif(model.movingObjects[7].y>1800):
+        model.movingObjects[7].setDirection(0)
     
     #draws the block
-    for x in range (35, 44):
-        blocks.append(model.movingObjects[x].drawBlock())
+    for x in range (0, 9):
+        blocks.append(model.movingObjects[x].drawSelf())
         
         
     #image of the exit door
@@ -1024,22 +1018,47 @@ def drawStageFifteenSpikes():
     spikes.append(pygame.Rect(0,0,w,h/30))
 
     #top spike attatched to block
-    surface.blit(spikeD, (1176*w/2000, (model.movingObjects[41].y-10)*h/2000, w/20, h/20))    
-    spikes.append(pygame.Rect(1176*w/2000+w/80,(model.movingObjects[41].y-10)*h/2000+h/40,w/20-w/40,h/20))
+    surface.blit(spikeD, (1176*w/2000, (model.movingObjects[6].y-10)*h/2000, w/20, h/20))    
+    spikes.append(pygame.Rect(1176*w/2000+w/80,(model.movingObjects[6].y-10)*h/2000+h/40,w/20-w/40,h/20))
     #bottom spike attatched to block
-    surface.blit(spike, (1176*w/2000, (model.movingObjects[42].y)*h/2000-h/16, w/20, h/20))    
-    spikes.append(pygame.Rect(1176*w/2000+w/80,(model.movingObjects[42].y)*h/2000+h/40-h/16,w/20-w/40,h/20))
+    surface.blit(spike, (1176*w/2000, (model.movingObjects[7].y)*h/2000-h/16, w/20, h/20))    
+    spikes.append(pygame.Rect(1176*w/2000+w/80,(model.movingObjects[7].y)*h/2000+h/40-h/16,w/20-w/40,h/20))
     
     return spikes
     
-def drawStageSixteen():
+def drawStageSixteen(SirBall):
     #contains all the blocks so I can test colides
     blocks=[]       
     #static blocks
+    #prevent going back
+    blocks.append(pygame.Rect(0,-h,w/100,2*h))
     #start block
-    pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/60),1) 
-    blocks.append(pygame.Rect(0,2*h/3,w/10,h/60))  
+    pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/2),1) 
+    blocks.append(pygame.Rect(0,2*h/3,w/10,h/2)) 
+    #rest of the way
+    pygame.draw.rect(surface,WHITE,(w/10,6*h/7,w/4,h/2),1) 
+    blocks.append(pygame.Rect(w/10,6*h/7,w/4,h/2)) 
+    #platform with sword
+    pygame.draw.rect(surface,WHITE,(w/10,4*h/10,w/10,h/20),1) 
+    blocks.append(pygame.Rect(w/10,4*h/10,w/10,h/20)) 
     
+    if(not SirBall.armed):
+        #image of the sword
+        Vsword=model.Vsword
+        surface.blit(Vsword, (w//10, 4*h/10-h//17))
+        
+    #initialize the evil bananas        x , y, min, max, dir, alive
+    if(model.movingObjects==[]):
+        banana=Banana(w/3, h/20, h/20, h/3, 2, True)
+        model.addMovingObject(banana)
+        banana=Banana(20*w/30, h/3, h/10, 2*h/3, 2, True)
+        model.addMovingObject(banana)
+        
+    model.movingObjects[0].drawSelf()
+    model.movingObjects[1].drawSelf()
+    
+
+        
     return blocks
 
 
@@ -1080,6 +1099,7 @@ class movingObject:
     def setType(self, value):
         self.type=value
             
+            
     def moveSelf(self):
         if(self.direction==0):
             self.setY(self.y-4)
@@ -1090,7 +1110,7 @@ class movingObject:
         elif(self.direction==3):
             self.setX(self.x-4)
             
-    def drawBlock(self):
+    def drawSelf(self):
         pygame.draw.rect(surface,self.type,(self.x*w/self.rate,self.y*h/self.rate, self.width, self.height),1) 
         return (pygame.Rect(self.x*w/self.rate,self.y*h/self.rate, self.width, self.height))
 
@@ -1112,9 +1132,108 @@ class movingObject:
         elif(self.type==3):
             surface.blit(spikeL, (self.x*w/self.rate,self.y*h/self.rate,self.width,self.height))
             return (pygame.Rect(self.x*w/self.rate+w/80,self.y*h/self.rate+h/40,self.width-w/40,self.height))
+            
+#(x,y)= location of banana
+#min/max =min/max value of x or y before changing directions
+#standard clockwise dir system: 0=up 1=right 2=down 3=left
+#lastShot=frame when last lazer whas shot
+class Banana:
+    def __init__(self, x, y, min, max, dir, alive):
+        self.x=x
+        self.y=y
+        self.min=min
+        self.max=max
+        self.dir=dir
+        self.alive=alive
+        self.lastShot=0
+        
+    def setDir(self, value):
+        self.dir=value
+    def setAlive(self,value):
+        self.alive=value
 
+        
+    def setX(self, value):
+        if(value>self.max):
+            self.setDir(3)
+        elif(value<self.min):
+            self.setDir(1)
+        else:
+            self.x=value
+            
+    def setY(self, value):
+        if(value>self.max):
+            self.setDir(0)
+        elif(value<self.min):
+            self.setDir(2)
+        else:
+            self.y=value 
+            
+    def setLastShot(self, value):
+        self.lastShot=value
+        
+    def moveSelf(self):
+        if(self.dir==0):
+            self.setY(self.y-h/300)
+        elif(self.dir==1):
+            self.setX(self.x+w/300)
+        elif(self.dir==2):
+            self.setY(self.y+h/300)
+        elif(self.dir==3):
+            self.setX(self.x-w/300)
+            
+    def drawSelf(self):
+        if(self.alive):
+            EvilBanana=model.EvilBanana
+            surface.blit(EvilBanana, (self.x, self.y))
+            
+    def getBox(self):
+        return (pygame.Rect(self.x+w/200,self.y,w/15,h/13))
+        
+#lazer object that bananas shoot
+class Lazer:
+    def __init__(self, x, y, xDot, yDot):
+        self.x=x
+        self.y=y
+        self.deltaX, self.deltaY, =self.calcSlope(x, y, xDot, yDot)
+        self.point1=(self.x, self.y)
+        self.point2=(self.x+30*self.deltaX, self.y+30*self.deltaY)
+        self.point3=(self.x+30*self.deltaX-10*self.deltaY, self.y+30*self.deltaY+10*self.deltaX)
+        self.point4=(self.x-10*self.deltaY, self.y+10*self.deltaX)        
 
+        
+    def moveSelf(self):
+        self.x+=self.deltaX*10
+        self.y+=self.deltaY*10
+        self.point1=(self.x, self.y)
+        self.point2=(self.x+30*self.deltaX, self.y+30*self.deltaY)
+        self.point3=(self.x+30*self.deltaX-10*self.deltaY, self.y+30*self.deltaY+10*self.deltaX)
+        self.point4=(self.x-10*self.deltaY, self.y+10*self.deltaX) 
+            
+    #calculates the slope of a line that goes 1 distance per move
+    def calcSlope(self, x, y, xDot, yDot):
+        slope=(yDot-y)/(xDot-x)
+        deltaX=1/math.sqrt((slope**2)+1)
+        deltaY=math.sqrt(1-(deltaX**2))
+        if(xDot<x):
+            slope*=-1
+            deltaX=deltaX*(-1)
+        if(yDot<y):
+            slope*=-1
+            deltaY=deltaY*(-1)        
+        return deltaX, deltaY
+        
+    def drawSelf(self):        
+        pygame.draw.polygon(surface,model.RED,((self.point1), (self.point2),(self.point3),(self.point4)),0) 
+            
 
+        
+
+        
+        
+        
+        
+        
 
 
 
