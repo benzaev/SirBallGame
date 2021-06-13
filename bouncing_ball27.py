@@ -55,7 +55,7 @@ def main():
     deaths=0
 
     #stage dot is on
-    stage=16
+    stage=1
                                   #xpos, ypos, controls jump and fall ani, numdeath, stagenum, ifHasSword
     SirBall=SirBallHimself.sirBall(xDot, yDot, jump, in_jump, fall, in_fall, deaths, stage,    False)
 

@@ -54,7 +54,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
     
     #music
-    #playMusic(wall_mad,music)         
+    playMusic(wall_mad,music)         
     
 #cycles through all moving objects and blits lazers to the screen
 def drawLazer():
