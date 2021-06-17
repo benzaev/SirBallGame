@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.27
+#version 10.28
 
 #Holds the stages and has a couple auxillary classes for little objects
 
@@ -945,7 +945,9 @@ def drawStageFifteen():
     #static blocks
     #start block
     pygame.draw.rect(surface,WHITE,(0,h/3,w/10,h/60),1) 
-    blocks.append(pygame.Rect(0,h/3,w/10,h/60))    
+    blocks.append(pygame.Rect(0,h/3,w/10,h/60))   
+    #stops from going past door
+    blocks.append(pygame.Rect(999*w/1000,0,w/10,h))  
     
     #initalize moving blocks
     if(model.movingObjects==[]):
@@ -1035,7 +1037,7 @@ def drawStageSixteen(SirBall):
     #start block
     pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/2),1) 
     blocks.append(pygame.Rect(0,2*h/3,w/10,h/2)) 
-    #rest of the way
+    #lower platform
     pygame.draw.rect(surface,WHITE,(w/10,6*h/7,w/4,h/2),1) 
     blocks.append(pygame.Rect(w/10,6*h/7,w/4,h/2)) 
     #platform with sword
@@ -1049,20 +1051,339 @@ def drawStageSixteen(SirBall):
         
     #initialize the evil bananas        x , y, min, max, dir, alive
     if(model.movingObjects==[]):
-        banana=Banana(w/3, h/20, h/20, h/3, 2, True)
+        banana=Banana(w/3, h/20, h/20, h/3, 2, True, 100)
         model.addMovingObject(banana)
-        banana=Banana(20*w/30, h/3, h/10, 2*h/3, 2, True)
+        banana=Banana(20*w/30, h/3, h/10, 2*h/3, 2, True, 100)
         model.addMovingObject(banana)
+    #initialize the moving blocks
+        block=movingObject(300, 900, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block) 
+        block=movingObject(1300, 900, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block)
         
     model.movingObjects[0].drawSelf()
     model.movingObjects[1].drawSelf()
+    blocks.append(model.movingObjects[2].drawSelf())
+    blocks.append(model.movingObjects[3].drawSelf())
+
+    return blocks
+    
+def drawStageSixteenSpikes():
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #fl00r spikes
+    offset=34*w/100
+    n=28
+    while(n>0):
+        surface.blit(spike, (offset, h-h/20, w/20, h/20))
+        n-=1
+        offset+=w/40
+        
+    spikes.append(pygame.Rect(34*w/100,h-h/20,w,h/30))
+    
+    return spikes
+    
+def drawStageSeventeen():
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #start block
+    pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/2),1) 
+    blocks.append(pygame.Rect(0,2*h/3,w/10,h/2)) 
+    #spikey wall
+    pygame.draw.rect(surface, WHITE,(99*w/100, 0, w/16+1, h/2), 1)
+    blocks.append(pygame.Rect(99*w/100, 0, w/16+1, h/2))
+    
+    
+    
+    if(model.movingObjects==[]):
+        #initialize the evil bananas        x , y, min, max, dir, alive, frequency
+        banana=Banana(w/3, h/20, w/3, 2*w/3, 1, True, 90)
+        model.addMovingObject(banana)
+        banana=Banana(20*w/30, h/3, h/10, 2*h/3, 2, True, 100)
+        model.addMovingObject(banana)
+        #moving upward
+        block=movingObject(230, 1500, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(230, 1000, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(230, 500, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block) 
+        #moving right
+        block=movingObject(0, 400, w/20, h/60, WHITE, 1500, 1)
+        model.addMovingObject(block)   
+        block=movingObject(400, 400, w/20, h/60, WHITE, 1500, 1)
+        model.addMovingObject(block)   
+        block=movingObject(800, 400, w/20, h/60, WHITE, 1500, 1)
+        model.addMovingObject(block) 
+        block=movingObject(1200, 400, w/20, h/60, WHITE, 1500, 1)
+        model.addMovingObject(block)
+        #moving left
+        block=movingObject(0, 1800, w/20, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)   
+        block=movingObject(400, 1800, w/20, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)   
+        block=movingObject(800, 1800, w/20, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block) 
+        block=movingObject(1200, 1800, w/20, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)
+        block=movingObject(1600, 1800, w/20, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)
+        
+    
+    model.movingObjects[0].drawSelf()
+    model.movingObjects[1].drawSelf()
+    
+    for x in range(2, 14):
+        blocks.append(model.movingObjects[x].drawSelf())
+
+
+    return blocks
+    
+    
+def drawStageSeventeenSpikes():
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #spikes    
+    #side line
+    offset=0
+    n=11
+    while(n>0):
+        surface.blit(spikeL, (105*w/110,-h/100+offset,w/20,h/20))
+        n-=1
+        offset+=h/23
+    spikes.append(pygame.Rect(107*w/110,0,w/20,h/2))
+    
+    #floor spikes
+    offset=3*w/40+w/80
+    n=40
+    while(n>0):
+        surface.blit(spike, (offset, h-h/18, w/20, h/20))
+        n-=1
+        offset+=w/40
+        
+    spikes.append(pygame.Rect(34*w/100,h-h/20,w,h/30))
+    
+    return spikes
+    
+    
+    
+def drawStageEighteenteen():
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #start block
+    pygame.draw.rect(surface,WHITE,(0,4*h/5,2*w/10,h/2),1) 
+    blocks.append(pygame.Rect(0,4*h/5,2*w/10,h/2)) 
+    #Low wall 2
+    pygame.draw.rect(surface, WHITE,(5*w/10, 9*h/10, 6*w/10, h/5+1), 1)
+    blocks.append(pygame.Rect(5*w/10, 9*h/10, 6*w/10, h/5+1))
+    #High wall 1
+    pygame.draw.rect(surface, WHITE,(5*w/10, 2*h/5, 6*w/10, h/60), 1)
+    blocks.append(pygame.Rect(5*w/10, 2*h/5, 6*w/10, h/60))
+    #they have to go through doors
+    blocks.append(pygame.Rect(999*w/1000, 0, w/20, h))
+
+
+    #blits signs    
+    sign=model.sign
+    surface.blit(sign, (7*w/10, 9*h/10-h//6)) 
+    sign=model.sign
+    surface.blit(sign, (7*w/10, 2*h/5-h//6)) 
+    door=model.Door
+    surface.blit(door, (17*w/20, h//13)) 
+    door=model.Door
+    surface.blit(door, (17*w/20, 23*h//40)) 
+    
+    #moving blocks
+    if(model.movingObjects==[]):
+        #moving upward
+        block=movingObject(450, 1500, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(450, 1000, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(450, 500, w/20, h/60, WHITE, 1500, 0)
+        model.addMovingObject(block) 
+        #initialize the evil bananas        x , y, min, max, dir, alive, frequency
+        banana=Banana(15*w/30, 15*h/50, 0, 15*h/50, 0, True, 90)
+        model.addMovingObject(banana)
+        banana=Banana(15*w/30, 25*h/50, 23*h/50, 40*h/50, 2, True, 110)
+        model.addMovingObject(banana)
+        
+    #draw moving blocks
+    for x in range(0, 3):
+        blocks.append(model.movingObjects[x].drawSelf())
+        
+    #draw bananas
+    model.movingObjects[3].drawSelf()
+    model.movingObjects[4].drawSelf()
+
+    return blocks
+    
+def drawStageEighteenSpikes():
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #spikes    
+    
+    #ceiling of bottom
+    offset=5*w/10-w/80
+    n=20
+    while(n>0):
+        surface.blit(spikeD, (offset, 2*h/5-h/100, w/20, h/20))
+        n-=1
+        offset+=w/40
+        
+    spikes.append(pygame.Rect(5*w/10, 2*h/5+h/80, w, h/30))
+    
+    return spikes
+    
+def drawStageMoreGems(SirBall):
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #no going back
+    blocks.append(pygame.Rect(0,0,w/1000,h))     
+    #start block
+    pygame.draw.rect(surface,WHITE,(0,4*h/5,w/4,h/2),1) 
+    blocks.append(pygame.Rect(0,4*h/5,w/4,h/2)) 
+    #high left
+    pygame.draw.rect(surface,WHITE,(0,2*h/5,w/4,h/60),1) 
+    blocks.append(pygame.Rect(0,2*h/5,w/4,h/60)) 
+    #high long
+    pygame.draw.rect(surface,WHITE,(11*w/30,h/5,w/4,h/60),1) 
+    blocks.append(pygame.Rect(11*w/30,h/5,w/4,h/60)) 
+    #high right
+    pygame.draw.rect(surface,WHITE,(11*w/12,2*h/5,w/8,h/60),1) 
+    blocks.append(pygame.Rect(11*w/12,2*h/5,w/4,h/60))
+    #if have enough gems stop them from going farther
+    if(SirBall.stage>=19 and SirBall.stage<100 and SirBall.gems>=50):
+        blocks.append(pygame.Rect(999*w/1000, 0, w/1000, h))
+        #make it easier to get back
+        pygame.draw.rect(surface,WHITE,(w/4,11*h/12,w,h),1) 
+        blocks.append(pygame.Rect(w/4,11*h/12,w,h))
+        
+
+    #moving blocks
+    if(model.movingObjects==[]):
+        #moving downward
+        block=movingObject(440, 1000, w/20, h/60, WHITE, 1500, 2)
+        model.addMovingObject(block)   
+        block=movingObject(440, 500, w/20, h/60, WHITE, 1500, 2)
+        model.addMovingObject(block)   
+        block=movingObject(440, 0, w/20, h/60, WHITE, 1500, 2)
+        model.addMovingObject(block) 
+        #bottom oscilate
+        block=movingObject(600, 780, w/20, h/60, WHITE, 800, 1)
+        model.addMovingObject(block)
+        #middle oscilate
+        block=movingObject(700, 1200, w/20, h/60, WHITE, 2000, 1)
+        model.addMovingObject(block)
+        #spikey block
+        block=movingObject(755, 0, w/40, h/25, WHITE, 800, 2)
+        model.addMovingObject(block)
+        #moving upward
+        block=movingObject(1700, 1332, w/20, h/60, WHITE, 2000, 0)
+        model.addMovingObject(block)   
+        block=movingObject(1700, 666, w/20, h/60, WHITE, 2000, 0)
+        model.addMovingObject(block)   
+        block=movingObject(1700, 0, w/20, h/60, WHITE, 2000, 0)
+        model.addMovingObject(block) 
+        #banana
+        banana=Banana(10*w/30, 20*h/50, 10*w/30, 16*w/30, 1, True, 80-(SirBall.stage-19)*3)
+        model.addMovingObject(banana)
+        
+        
+    #bottom oscillating block
+    if(model.movingObjects[3].x>755):
+        model.movingObjects[3].setDirection(3)
+    elif(model.movingObjects[3].x<480):
+        model.movingObjects[3].setDirection(1)
+    #middle oscillating block
+    if(model.movingObjects[4].x>1100):
+        model.movingObjects[4].setDirection(3)
+    elif(model.movingObjects[4].x<700):
+        model.movingObjects[4].setDirection(1)    
+        
+        
+    #draw moving blocks
+    for x in range(0, 9):
+        blocks.append(model.movingObjects[x].drawSelf())
+        
+    #draw bananas
+    model.movingObjects[9].drawSelf()
+    
+    if(SirBall.gems>=50):
+        #blits door    
+        door=model.Door
+        surface.blit(door, (w/40, h//13)) 
+ 
+       
+
+    return blocks
+    
+def drawStageMoreGemsSpikes():
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #cause there was a wierd bug
+    if(not(model.movingObjects==[])):
+        #attatched spike facing up
+        surface.blit(spike, (93*w/100, (model.movingObjects[5].y-50)*h/800, w/20, h/20))    
+        spikes.append(pygame.Rect(93*w/100+w/80,(model.movingObjects[5].y-50)*h/800+h/40,w/20-w/40,h/20))
+        #facing right
+        surface.blit(spikeR, (191*w/200, (model.movingObjects[5].y-20)*h/800, w/20, h/20))    
+        spikes.append(pygame.Rect(191*w/200+w/80,(model.movingObjects[5].y-20)*h/800+h/40,w/20-w/40,h/20))
+        #facing down spike attatched to block
+        surface.blit(spikeD, (93*w/100, (model.movingObjects[5].y+16)*h/800, w/20, h/20))    
+        spikes.append(pygame.Rect(93*w/100+w/80,(model.movingObjects[5].y+16)*h/800+h/40,w/20-w/40,h/20))
+        #facing left
+        surface.blit(spikeL, (181*w/200, (model.movingObjects[5].y-20)*h/800, w/20, h/20))    
+        spikes.append(pygame.Rect(181*w/200+w/80,(model.movingObjects[5].y-20)*h/800+h/40,w/20-w/40,h/20))
+    
+    return spikes
+    
+    
+#Altar stage
+def drawStage100():
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #no going back
+    blocks.append(pygame.Rect(0,0,w/1000,h))  
+    #start block
+    pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/2),1) 
+    blocks.append(pygame.Rect(0,2*h/3,w/10,h/2))       
+
+
+    return blocks
+    
+    
+    
+    
+    
+    
     
 
-        
-    return blocks
-
-
-
+###########################################################################Objects###################################################################
 #moving object wherever you want
 #increase rate to make the object move slower
 #direction: 0--> up  1--> right  2--> down  3--> left
@@ -1137,8 +1458,9 @@ class movingObject:
 #min/max =min/max value of x or y before changing directions
 #standard clockwise dir system: 0=up 1=right 2=down 3=left
 #lastShot=frame when last lazer whas shot
+#frequency=how often to shoot a laser
 class Banana:
-    def __init__(self, x, y, min, max, dir, alive):
+    def __init__(self, x, y, min, max, dir, alive, frequency):
         self.x=x
         self.y=y
         self.min=min
@@ -1146,6 +1468,7 @@ class Banana:
         self.dir=dir
         self.alive=alive
         self.lastShot=0
+        self.frequency=frequency
         
     def setDir(self, value):
         self.dir=value

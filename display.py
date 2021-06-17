@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.27
+#version 10.28
 
 #This blits everything
 
@@ -16,12 +16,12 @@ h= model.h
 surface= model.surface
 
 #projects to screen
-def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap, gems):
+def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap):
     #makes mouse invisible while in the stages
     pygame.mouse.set_visible(False)  
     
    #background image
-    background()
+    background(SirBall)
 
     #draws the wall
     drawWall(SirBall.stage, wall_mad, xWall, wStage)
@@ -39,20 +39,22 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
     gemBlit(SirBall.stage, gemmap)
 
     #writes #deaths and gems
-    writeBasics(SirBall.stage,SirBall.deaths, gems) 
+    writeBasics(SirBall) 
 
     #draws acessories (like arrows and stuff)
-    drawAcessories(SirBall.stage,wall_mad,SirBall.xDot,wall_defeated) 
+    drawAcessories(SirBall,wall_mad,wall_defeated) 
 
-    #draw Lazers
+    #draw Lazers    
     drawLazer()
+    
+    #test draw
+    #pygame.draw.rect(surface,model.RED,(w/40,h/13, w/8, h/3),1) 
+
 
     #draws the dot      
     drawDot(SirBall)
-    
-    pygame.draw.rect(surface,model.RED,(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25),1) 
 
-    
+        
     #music
     playMusic(wall_mad,music)         
     
@@ -64,9 +66,14 @@ def drawLazer():
             
 
 #blits background
-def background():
-    DarkRealm= model.DarkRealm
-    surface.blit(DarkRealm, (0, 0)) 
+def background(SirBall):
+    if(not SirBall.stage==100):
+        DarkRealm= model.DarkRealm
+        surface.blit(DarkRealm, (0, 0))
+    else:
+        Altar=model.Altar
+        surface.blit(Altar, (0, 0))
+
 
 #plays music. Skip allows new song to play before old one finishes
     #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins
@@ -88,12 +95,12 @@ def playMusic(wall_mad,skip):
     pygame.mixer.music.load(track)
     pygame.mixer.music.play()
     
-def writeBasics(stage,deaths, gems):
-    text="Deaths "+str(deaths)
+def writeBasics(SirBall):
+    text="Deaths "+str(SirBall.deaths)
     textBounds=(18*w/20,h/20)
     messagePrint(w//40,text,textBounds,model.LGREY) 
-    if(stage>=6):
-        text="Crystals " + str(gems)
+    if(SirBall.stage>=6):
+        text="Crystals " + str(SirBall.gems)
         textBounds=(w/15, h/20)
         messagePrint(w//40,text,textBounds,model.LGREY) 
 
@@ -118,36 +125,46 @@ def drawStage(SirBall):
     stage=SirBall.stage
     if stage==1:
         return stages.drawStageOne()
-    if stage==2:
+    elif stage==2:
         return stages.drawStageTwo()
-    if stage==3:
+    elif stage==3:
         return stages.drawStageThree()
-    if stage==4:
+    elif stage==4:
         return stages.drawStageFour()
-    if stage==5:
+    elif stage==5:
         return stages.drawStageFive()
-    if stage==6:
+    elif stage==6:
         return stages.drawStageSix()
-    if stage==7:
+    elif stage==7:
         return stages.drawStageSeven()
-    if stage==8:
+    elif stage==8:
         return stages.drawStageEight()
-    if stage==9:
+    elif stage==9:
         return stages.drawStageNine()
-    if stage==10:
+    elif stage==10:
         return stages.drawStageTen()
-    if stage==11: 
+    elif stage==11: 
         return stages.drawStageEleven()
-    if stage==12:
+    elif stage==12:
         return stages.drawStageTwelve()
-    if stage==13:
+    elif stage==13:
         return stages.drawStageThirteen()
-    if stage==14:
+    elif stage==14:
         return stages.drawStageFourteen()
-    if stage==15:
+    elif stage==15:
         return stages.drawStageFifteen()
-    if stage==16:
+    elif stage==16:
         return stages.drawStageSixteen(SirBall)
+    elif stage==17:
+        return stages.drawStageSeventeen()
+    elif stage==18:
+        return stages.drawStageEighteenteen()
+    #get more gems
+    elif (stage>=19 and stage<100):
+        return stages.drawStageMoreGems(SirBall)
+    #altar
+    elif stage==100:
+        return stages.drawStage100()
 
         
 def drawSpikes(stage):
@@ -171,12 +188,23 @@ def drawSpikes(stage):
         return stages.drawStageFourteenSpikes()
     elif stage==15:
         return stages.drawStageFifteenSpikes()
+    elif stage==16:
+        return stages.drawStageSixteenSpikes()
+    elif stage==17:
+        return stages.drawStageSeventeenSpikes()
+    elif stage==18:
+        return stages.drawStageEighteenSpikes()
+    elif stage>=19 and stage<100:
+        return stages.drawStageMoreGemsSpikes()
+
     else:
         return []
            
     
 #draws arrows and background messages
-def drawAcessories(stage,wall_mad, xDot,wall_defeated):
+def drawAcessories(SirBall,wall_mad,wall_defeated):
+    xDot=SirBall.xDot
+    stage=SirBall.stage
     #opening instructions
     if(not wall_mad and not wall_defeated and stage==1):
         text="MOVE LEFT AND RIGHT USING ARROW KEYS"
@@ -185,6 +213,42 @@ def drawAcessories(stage,wall_mad, xDot,wall_defeated):
         text="JUMP USING SPACEBAR"
         textBounds=(w/2,h/20+h/30)
         messagePrint(w//50,text,textBounds,model.LGREY)
+    #instructions for meeting bananas
+    if(stage==16):
+        text="USE THE SWORD TO DESTROY THE BANANAS"
+        textBounds=(w/2,h/20)
+        messagePrint(w//50,text,textBounds,model.LGREY)
+        text="AVOID THE LASERS!"
+        textBounds=(w/2,h/20+h/30)
+        messagePrint(w//50,text,textBounds,model.LGREY)
+    #text on signs stage 18
+    if(stage==18):
+        text="More Gems"
+        textBounds=(151*w/200, 91*h/100-h//8)
+        messagePrint(w//60,text,textBounds,model.BLACK)
+        text="This Way"
+        textBounds=(151*w/200, 91*h/100-h//8+h/30)
+        messagePrint(w//60,text,textBounds,model.BLACK)
+        text="THE ALTAR"
+        textBounds=(151*w/200, 2*h/5-h//9)
+        messagePrint(w//60,text,textBounds,model.BLACK)
+        if(SirBall.gems<50 and SirBall.xDot>w/2 and SirBall.yDot<=2*h/5):
+            text="YOU NEED MORE GEMS"
+            textBounds=(w/2,h/20)
+            messagePrint(w//50,text,textBounds,model.LGREY)
+        elif(SirBall.gems>=50):
+            text="YOU HAVE ENOUGH GEMS"
+            textBounds=(w/2,h/20)
+            messagePrint(w//50,text,textBounds,model.LGREY)
+            text="GO TO THE ALTAR"
+            textBounds=(w/2,h/20+h/30)
+            messagePrint(w//50,text,textBounds,model.LGREY)
+    #text on stage 19+
+    if(stage>=19 and stage<100 and SirBall.gems<50):
+        text="YOU NEED MORE GEMS"
+        textBounds=(w/2,h/20)
+        messagePrint(w//50,text,textBounds,model.LGREY)
+            
 
     #blue button and arrows
     if(stage==1 and wall_mad and not wall_defeated):
@@ -237,6 +301,14 @@ def gemBlit(stage, gemmap):
         gemBlit14(gemmap)
     elif(stage==15):
         gemBlit15(gemmap)
+    elif(stage==16):
+        gemBlit16(gemmap)
+    elif(stage==17):
+        gemBlit17(gemmap)
+    elif(stage==18):
+        gemBlit18(gemmap)
+    elif(stage>=19 and stage<100):
+        gemBlit19(gemmap)
 
 
 def gemBlit6(gemmap):
@@ -350,7 +422,7 @@ def gemBlit12(gemmap):
         surface.blit(crystal, (9*w/12, 13*h/32, w/30, h/30)) 
 
 
-#36 gems total
+#36 gems total not including bananas
 def gemBlit13(gemmap):
     crystal=model.crystal
     map=gemmap[7]
@@ -376,6 +448,7 @@ def gemBlit14(gemmap):
     if(map&0b1):    
         surface.blit(crystal,(w/4+6*w/10, h/2-h/20, w/30, h/30))
 
+#46 total
 def gemBlit15(gemmap):
     crystal=model.crystal
     map=gemmap[9]
@@ -389,8 +462,66 @@ def gemBlit15(gemmap):
         surface.blit(crystal,(9*w/12, 2*h/8, w/30, h/30))
     if(map&0b1):    
         surface.blit(crystal,(3*w/5, h/6, w/30, h/30))
+        
+#49 total
+def gemBlit16(gemmap):
+    crystal=model.crystal
+    map=gemmap[10]
+    if(map&0b100):    
+        surface.blit(crystal,(w/3+w/40, 4*h/20, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(w/3+w/40, 12*h/20, w/30, h/30))
+    if(map&0b1):   
+        surface.blit(crystal,(20*w/30+w/40, 7*h/20, w/30, h/30))
 
-
+#52 total
+def gemBlit17(gemmap):
+    crystal=model.crystal
+    map=gemmap[11]
+    if(map&0b100):    
+        surface.blit(crystal,(w/3+w/40, 44*h/200, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(w/3+w/4, 44*h/200, w/30, h/30))
+    if(map&0b1):    
+        surface.blit(crystal,(w/3+w/2, 44*h/200, w/30, h/30))
+        
+#62 total
+def gemBlit18(gemmap):
+    crystal=model.crystal
+    map=gemmap[12]
+    if(map&0b1000):    
+        surface.blit(crystal,(5*w/10, 9*h/10-h/20, w/30, h/30))
+    if(map&0b100):    
+        surface.blit(crystal,(6*w/10, 9*h/10-h/20, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(7*w/10, 9*h/10-h/20, w/30, h/30))
+    if(map&0b1):    
+        surface.blit(crystal,(8*w/10, 9*h/10-h/20, w/30, h/30))
+        
+#72 total
+def gemBlit19(gemmap):
+    crystal=model.crystal
+    map=gemmap[13]
+    if(map&0b1000000000):    
+        surface.blit(crystal,(13*w/20, 3*h/10, w/30, h/30))
+    if(map&0b100000000):    
+        surface.blit(crystal,(13*w/20, 4*h/10, w/30, h/30))
+    if(map&0b10000000):    
+        surface.blit(crystal,(13*w/20, 5*h/10, w/30, h/30))
+    if(map&0b1000000):    
+        surface.blit(crystal,(13*w/20, 6*h/10, w/30, h/30))
+    if(map&0b100000):    
+        surface.blit(crystal,(8*w/20, 3*h/20, w/30, h/30))
+    if(map&0b10000):    
+        surface.blit(crystal,(9*w/20, 3*h/20, w/30, h/30))
+    if(map&0b1000):    
+        surface.blit(crystal,(10*w/20, 3*h/20, w/30, h/30))
+    if(map&0b100):    
+        surface.blit(crystal,(11*w/20, 3*h/20, w/30, h/30))
+    if(map&0b10):    
+        surface.blit(crystal,(6*w/15, 7*h/20, w/30, h/30))
+    if(map&0b1):    
+        surface.blit(crystal,(8*w/15, 7*h/20, w/30, h/30))
 
 
 

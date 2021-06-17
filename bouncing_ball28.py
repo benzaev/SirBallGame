@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.27
+#version 10.28
 
-#Update: Add more levels
+#Update: add more levels
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -31,8 +31,7 @@ def main():
     music=0
     
     #gems bitmap
-    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111, 0b11, 0b111111, 0b111111, 0b111, 0b11111, 0b11111]
-    gems=0
+    gemmap=[0b11, 0b111, 0b11111, 0b1111111111111, 0b11, 0b111111, 0b111111, 0b111, 0b11111, 0b11111, 0b111, 0b111, 0b1111, 0b1111111111]
     
     #lvl 1 wall
     wall_mad=False
@@ -66,12 +65,12 @@ def main():
             if(event.type == pygame.QUIT or (event.type==pygame.KEYDOWN and event.key==pygame.K_ESCAPE)):
                 pygame.quit()
                 sys.exit()
-                        
+                 
         #The Control. Does all moving parts
-        interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame = control.controller(SirBall,keys,  interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame)
+        interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame = control.controller(SirBall,keys,  interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame)
         
         #The View. Blits everything to the screen
-        display.view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap, gems)
+        display.view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap)
         
         #standard display output
         pygame.display.update()

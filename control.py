@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.27
+#version 10.28
 
 #moves stuff around
 
@@ -14,7 +14,7 @@ w=model.w
 h=model.h
 
 #all moving parts
-def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame):
+def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame):
     #master control
    # if (keys[pygame.K_a] and not keys==prevKey):
     #    SirBall.setstage(SirBall.stage+1)  
@@ -32,7 +32,7 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
         wall_mad,wall_defeated,xWall,wStage, music=wallMechanics(SirBall,xWall,wStage,wall_mad, wall_defeated, music)
         
         #moving the dot
-        moveDot(keys,SirBall)  
+        gemmap=moveDot(keys,SirBall, gemmap)  
                 
         #does a cute little jump action
         jumpDot(keys,SirBall)
@@ -44,7 +44,7 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
         #respawn
         xWall,wStage,wall_defeated=respawn(xWall,wStage,wall_mad, wall_defeated, SirBall)   
         
-        gemmap, gems= collectGem(SirBall, gemmap, gems)
+        gemmap= collectGem(SirBall, gemmap)
         
         rightToBearArms(SirBall)
         
@@ -63,7 +63,7 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
     
     frame+=1
     
-    return interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, gems, frame
+    return interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame
 
 
 #shoots lazers at SirBall from bananas      x, y, xDot, yDot
@@ -72,7 +72,7 @@ def shootLazers(SirBall, frame):
     yDot=SirBall.yDot+w/40
     for q in model.movingObjects:
         if (isinstance(q, display.stages.Banana)):
-            if (q.alive and q.lastShot+100<frame):
+            if (q.alive and q.lastShot+q.frequency<frame):
                 laser=display.stages.Lazer(q.x, q.y, xDot, yDot)
                 model.addMovingObject(laser)
                 q.setLastShot(frame)
@@ -86,7 +86,8 @@ def killEnemy(SirBall):
         if (isinstance(x, display.stages.Banana)):
             if(x.getBox().colliderect(ballRect) and x.alive):
                 if(SirBall.armed):
-                    x.setAlive(False)                
+                    x.setAlive(False)
+                    SirBall.gems+=1
                 
                 
 #moves all the movable blocks
@@ -123,6 +124,31 @@ def nextLevel(SirBall, wall_defeated, numMess, wall_mad, music):
         SirBall.setyDot(h/2)
         numMess=0
         model.resetMovingObjects()
+    #goes through doors on stage 18
+    door18=pygame.Rect(69*w/80, h//13,w/10, h/3)
+    door182=pygame.Rect(69*w/80, 23*h//40, w/10, h/3)
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+    if(SirBall.stage==18 and door18.colliderect(ballRect) and SirBall.gems>=50):
+        SirBall.setstage(100)
+        SirBall.setxDot(w/100)
+        SirBall.setyDot(2*h/3-w/20)
+        numMess=0
+        model.resetMovingObjects()
+    if(SirBall.stage==18 and door182.colliderect(ballRect) and SirBall.gems<50):
+        SirBall.setstage(19)
+        SirBall.setxDot(w/5)
+        SirBall.setyDot(4*h/5-w/20)
+        numMess=0
+        model.resetMovingObjects()
+    #door on stage 19+
+    door19=pygame.Rect(w/40,h/13, w/8, h/3)
+    if(SirBall.stage>=19 and SirBall.stage<100 and door19.colliderect(ballRect) and SirBall.gems>=50):
+        SirBall.setstage(100)
+        SirBall.setxDot(w/100)
+        SirBall.setyDot(2*h/3-w/20)
+        numMess=0
+        model.resetMovingObjects()
+    
 
     
     return numMess, wall_mad, music
@@ -231,28 +257,52 @@ def YCeiling (SirBall):
 
     
 #moves dot left or right
-def moveDot(keys,SirBall):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
-    stage=SirBall.stage
+def moveDot(keys,SirBall, gemmap):
+    #checks to see if Sir Ball is on a moving platform
+    for q in model.movingObjects:
+        if (isinstance(q, display.stages.movingObject)):
+            #if Sir Ball is on a moving platform
+            if(SirBall.xDot+w/40>q.x*w/q.rate and SirBall.xDot+w/40<q.x*w/q.rate+q.width  and (SirBall.yDot+w/20)//1==q.y*h//q.rate):
+                if(q.direction==1 and moveRight(SirBall)):
+                    SirBall.setxDot(SirBall.xDot+4*w/q.rate)
+                    if(SirBall.xDot+w/20>w):
+                        SirBall.setxDot(0)
+                        SirBall.setstage(SirBall.stage+1)
+                        model.resetMovingObjects()
+                        SirBall.prevX=-1
+                        #if past stage 19, reset gemmap
+                        if(SirBall.stage>19):
+                            gemmap[13]=0b1111111111
+                elif(q.direction==3 and moveLeft(SirBall)):
+                    SirBall.setxDot(SirBall.xDot-4*w/q.rate)
+                    if(SirBall.xDot<0):
+                        SirBall.setxDot(w-w/20)
+                        SirBall.setstage(SirBall.stage-1)
+                        model.resetMovingObjects()
+                        SirBall.prevX=w
     
     if (keys[pygame.K_RIGHT] and moveRight(SirBall)):
-        if (xDot+w/20)<w:
-            SirBall.setxDot(xDot+w/200)
+        if (SirBall.xDot+w/20)<w:
+            SirBall.setxDot(SirBall.xDot+w/200)
         else:
             SirBall.setxDot(0)
-            SirBall.setstage(stage+1)
+            SirBall.setstage(SirBall.stage+1)
             model.resetMovingObjects()
+            SirBall.prevX=-1
+            #if past stage 19, reset gemmap
+            if(SirBall.stage>19):
+                gemmap[13]=0b1111111111
     if (keys[pygame.K_LEFT] and moveLeft(SirBall)):
-        if (xDot)>0:
-            SirBall.setxDot(xDot-w/200)
+        if (SirBall.xDot)>0:
+            SirBall.setxDot(SirBall.xDot-w/200)
         else:
-            if (stage!=1):
+            if (SirBall.stage!=1):
                 SirBall.setxDot(w-w/20)
-                SirBall.setstage(stage-1)
+                SirBall.setstage(SirBall.stage-1)
                 model.resetMovingObjects()
+                SirBall.prevX=w
 
-        
+    return gemmap
 
 
 #These check if there is an object blocking them from moving in a direction
@@ -329,7 +379,7 @@ def resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, hit_wall):
         resetY=0
         SirBall.setyDot(resetY)
     else:
-        SirBall.setxDot(0)
+        SirBall.setxDot(w/40)
         SirBall.setdeaths(SirBall.deaths+1)
         resetY=h/2
         SirBall.setyDot(resetY)
@@ -343,7 +393,10 @@ def resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, hit_wall):
             SirBall.setyDot(resetY)
         else:
             break
-                
+            
+    SirBall.prevX=-1
+    if(SirBall.gems>0):
+        SirBall.gems=SirBall.gems-1
     return xWall, wStage, wall_defeated
 
     
@@ -403,84 +456,85 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
     return numMess, interact, music
     
 #collects gems for Sir Ball
-def collectGem(SirBall, gemmap, gems):  
+def collectGem(SirBall, gemmap):  
     stage=SirBall.stage
     #stage 6 gems
     if (stage==6):
-        gemmap, gems=stage6Gems(SirBall, gemmap, gems)
+        gemmap=stage6Gems(SirBall, gemmap)
     #stage 7 gems
     if (stage==7):
-        gemmap, gems=stage7Gems(SirBall, gemmap, gems)    
+        gemmap=stage7Gems(SirBall, gemmap)    
     if (stage==8):
-        gemmap, gems=stage8Gems(SirBall, gemmap, gems)
+        gemmap=stage8Gems(SirBall, gemmap)
     if (stage==9):
-        gemmap, gems=stage9Gems(SirBall, gemmap, gems)
+        gemmap=stage9Gems(SirBall, gemmap)
     if (stage==10):
-        gemmap, gems=stage10Gems(SirBall, gemmap, gems)
+        gemmap=stage10Gems(SirBall, gemmap)
     if (stage==11):
-        gemmap, gems=stage11Gems(SirBall, gemmap, gems)
+        gemmap=stage11Gems(SirBall, gemmap)
     if (stage==12):
-        gemmap, gems=stage12Gems(SirBall, gemmap, gems)
+        gemmap=stage12Gems(SirBall, gemmap)
     if (stage==13):
-        gemmap, gems=stage13Gems(SirBall, gemmap, gems)
+        gemmap=stage13Gems(SirBall, gemmap)
     if (stage==14):
-        gemmap, gems=stage14Gems(SirBall, gemmap, gems)
+        gemmap=stage14Gems(SirBall, gemmap)
     if(stage==15):
-        gemmap, gems=stage15Gems(SirBall, gemmap, gems)
-
-
-    
-
+        gemmap=stage15Gems(SirBall, gemmap)
+    if(stage==16):
+        gemmap=stage16Gems(SirBall, gemmap)
+    if(stage==17):
+        gemmap=stage17Gems(SirBall, gemmap)
+    if(stage==18):
+        gemmap=stage18Gems(SirBall, gemmap)
+    if(stage>=19 and stage<100):
+        gemmap=stage19Gems(SirBall, gemmap)
         
-    return gemmap, gems    
+    return gemmap    
     
-def stage6Gems(SirBall, gemmap, gems):
+def stage6Gems(SirBall, gemmap):
     map=gemmap[0]
     gem1=pygame.Rect(3*w/5,h/5,w/20,h/20)
     gem2=pygame.Rect(9.5*w/10,h/5,w/20,h/20)
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     #first gem
-    if (map&10 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&10 and gem1.colliderect(ballRect)):
         map=map&1
-        gems+=1
+        SirBall.gems+=1
         gemmap[0]=map
     #second gem
-    if (map&1 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&1 and gem2.colliderect(ballRect)):
         map=map&10
-        gems+=1
+        SirBall.gems+=1
         gemmap[0]=map
         
-    return gemmap, gems
+    return gemmap
 
-def stage7Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage7Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[1]
     gem1=pygame.Rect(3*w/12,28*h/40,w/20,h/20)
     gem2=pygame.Rect(86*w/120,84*h/120,w/20,h/20)
     gem3=pygame.Rect(9.5*w/10,h/5,w/20,h/20)
     #first gem
-    if (map&100 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&100 and gem1.colliderect(ballRect)):
         map=map&11
-        gems+=1
+        SirBall.gems+=1
         gemmap[1]=map
     #second gem
-    if (map&10 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&10 and gem2.colliderect(ballRect)):
         map=map&101
-        gems+=1
+        SirBall.gems+=1
         gemmap[1]=map
     #third gem
-    if (map&1 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&1 and gem3.colliderect(ballRect)):
         map=map&110
-        gems+=1
+        SirBall.gems+=1
         gemmap[1]=map
         
-    return gemmap, gems
+    return gemmap
 
-def stage8Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage8Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[2]
     gem1=pygame.Rect(12*w/30-w/30, 14*h/30-h/20, w/30, h/20)
     gem2=pygame.Rect(12*w/30, 14*h/30-h/20, w/30, h/20)
@@ -489,36 +543,35 @@ def stage8Gems(SirBall, gemmap, gems):
     gem5=pygame.Rect(2*w/3-w/10, 99*h/100-h/20, w/30, h/20)
 
     #first gem
-    if (map&0b10000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem1.colliderect(ballRect)):
         map=map&0b1111
-        gems+=1
+        SirBall.gems+=1
         gemmap[2]=map
     #second gem
-    elif (map&0b1000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    elif (map&0b1000 and gem2.colliderect(ballRect)):
         map=map&0b10111
-        gems+=1
+        SirBall.gems+=1
         gemmap[2]=map
     #third gem
-    elif (map&0b100 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    elif (map&0b100 and gem3.colliderect(ballRect)):
         map=map&0b11011
-        gems+=1
+        SirBall.gems+=1
         gemmap[2]=map
     #fourth gem
-    elif (map&0b10 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+    elif (map&0b10 and gem4.colliderect(ballRect)):
         map=map&0b11101
-        gems+=1
+        SirBall.gems+=1
         gemmap[2]=map
     #fifth gem
-    elif (map&0b1 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+    elif (map&0b1 and gem5.colliderect(ballRect)):
         map=map&0b11110
-        gems+=1
+        SirBall.gems+=1
         gemmap[2]=map
         
-    return gemmap, gems
+    return gemmap
 
-def stage9Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage9Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[3]
     gem1=pygame.Rect(w/4+w/10, h/6-h/20, w/30, h/20)
     gem2=pygame.Rect(w/2, h/6-h/20, w/30, h/20)
@@ -534,71 +587,69 @@ def stage9Gems(SirBall, gemmap, gems):
     gem12=pygame.Rect(w/3,18*h/20, w/30, h/32)
     gem13=pygame.Rect(2*w/3,18*h/20, w/30, h/20)
     #first gem
-    if (map&0b1000000000000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000000000000 and gem1.colliderect(ballRect)):
         map=map&0b111111111111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
     #second gem
-    if (map&0b100000000000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100000000000 and gem2.colliderect(ballRect)):
         map=map&0b1011111111111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
     #third gem
-    if (map&0b10000000000 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000000000 and gem3.colliderect(ballRect)):
         map=map&0b1101111111111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
     #etc
-    if (map&0b10000000 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000000 and gem6.colliderect(ballRect)):
         map=map&0b1111101111111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
-    if (map&0b1000000 and gem7.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000000 and gem7.colliderect(ballRect)):
         map=map&0b1111110111111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
-    if (map&0b100000 and gem8.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100000 and gem8.colliderect(ballRect)):
         map=map&0b1111111011111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
-    if (map&0b10000 and gem9.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem9.colliderect(ballRect)):
         map=map&0b1111111101111
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
-    if (map&0b10 and gem12.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem12.colliderect(ballRect)):
         map=map&0b1111111111101
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
-    if (map&0b1 and gem13.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem13.colliderect(ballRect)):
         map=map&0b1111111111110
-        gems+=1
+        SirBall.gems+=1
         gemmap[3]=map
 
         
-    return gemmap, gems
+    return gemmap
     
-def stage10Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage10Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[4]
     gem1=pygame.Rect(w/50, 9*h/10-h/20, w/30, h/20)          
     gem2=pygame.Rect(19*w/20, 9*h/10-h/20, w/30, h/20) 
     #first gem
-    if (map&10 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&10 and gem1.colliderect(ballRect)):
         map=map&1
-        gems+=1
+        SirBall.gems+=1
         gemmap[4]=map
     #second gem
-    if (map&1 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&1 and gem2.colliderect(ballRect)):
         map=map&10
-        gems+=1
+        SirBall.gems+=1
         gemmap[4]=map
         
-    return gemmap, gems
+    return gemmap
     
-def stage11Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage11Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[5]
     gem1=pygame.Rect(5*w/12-4*w/15, 11*h/30-h/18, w/30, h/30) 
     gem2=pygame.Rect(5*w/12-2*w/15, 11*h/30-h/18, w/30, h/30) 
@@ -608,38 +659,37 @@ def stage11Gems(SirBall, gemmap, gems):
     gem6=pygame.Rect(5*w/12+6*w/15, 11*h/30-h/18, w/30, h/30) 
         
     #first gem
-    if (map&0b100000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100000 and gem1.colliderect(ballRect)):
         map=map&0b11111
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
     #second gem...
-    if (map&0b10000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem2.colliderect(ballRect)):
         map=map&0b101111
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
-    if (map&0b1000 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000 and gem3.colliderect(ballRect)):
         map=map&0b110111
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
-    if (map&0b100 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100 and gem4.colliderect(ballRect)):
         map=map&0b111011
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
-    if (map&0b10 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem5.colliderect(ballRect)):
         map=map&0b111101
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
-    if (map&0b1 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem6.colliderect(ballRect)):
         map=map&0b111110
-        gems+=1
+        SirBall.gems+=1
         gemmap[5]=map
 
-    return gemmap, gems
+    return gemmap
     
     
-def stage12Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage12Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[6]
     gem1=pygame.Rect(2*w/6, h/10, w/30, h/30)          
     gem2=pygame.Rect(3*w/6, h/10, w/30, h/30) 
@@ -648,120 +698,244 @@ def stage12Gems(SirBall, gemmap, gems):
     gem5=pygame.Rect(7*w/12, 13*h/32, w/30, h/30)          
     gem6=pygame.Rect(9*w/12, 13*h/32, w/30, h/30) 
     #first gem
-    if (map&0b100000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100000 and gem1.colliderect(ballRect)):
         map=map&0b11111
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
     #second gem ...
-    if (map&0b10000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem2.colliderect(ballRect)):
         map=map&0b101111
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
-    if (map&0b1000 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000 and gem3.colliderect(ballRect)):
         map=map&0b110111
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
-    if (map&0b100 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100 and gem4.colliderect(ballRect)):
         map=map&0b111011
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
-    if (map&0b10 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem5.colliderect(ballRect)):
         map=map&0b111101
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
-    if (map&0b1 and gem6.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem6.colliderect(ballRect)):
         map=map&0b111110
-        gems+=1
+        SirBall.gems+=1
         gemmap[6]=map
         
-    return gemmap, gems   
+    return gemmap   
 
-def stage13Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage13Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[7]
     gem1=pygame.Rect(w/90, 3*h/12-h/20, w/30, h/30)          
     gem2=pygame.Rect(w/90+w/20, 3*h/12-h/20, w/30, h/30) 
     gem3=pygame.Rect(w/90+2*w/20, 3*h/12-h/20, w/30, h/30)           
-    if (map&0b100 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100 and gem1.colliderect(ballRect)):
         map=map&0b11
-        gems+=1
+        SirBall.gems+=1
         gemmap[7]=map
-    if (map&0b10 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem2.colliderect(ballRect)):
         map=map&0b101
-        gems+=1
+        SirBall.gems+=1
         gemmap[7]=map
-    if (map&0b1 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem3.colliderect(ballRect)):
         map=map&0b110
-        gems+=1
+        SirBall.gems+=1
         gemmap[7]=map
         
-    return gemmap, gems     
+    return gemmap     
 
-def stage14Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage14Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[8]
     gem1=pygame.Rect(w/4, h/2-h/20, w/30, h/30)          
     gem2=pygame.Rect(w/4+3*w/20, 6*h/10, w/30, h/30) 
     gem3=pygame.Rect(w/4+3*w/10, h/2-h/20, w/30, h/30)   
     gem4=pygame.Rect(w/4+9*w/20, 6*h/10, w/30, h/30) 
     gem5=pygame.Rect(w/4+6*w/10, h/2-h/20, w/30, h/30) 
-    if (map&0b10000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem1.colliderect(ballRect)):
         map=map&0b1111
-        gems+=1
+        SirBall.gems+=1
         gemmap[8]=map
-    if (map&0b1000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000 and gem2.colliderect(ballRect)):
         map=map&0b10111
-        gems+=1
+        SirBall.gems+=1
         gemmap[8]=map
-    if (map&0b100 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100 and gem3.colliderect(ballRect)):
         map=map&0b11011
-        gems+=1
+        SirBall.gems+=1
         gemmap[8]=map
-    if (map&0b10 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem4.colliderect(ballRect)):
         map=map&0b11101
-        gems+=1
+        SirBall.gems+=1
         gemmap[8]=map
-    if (map&0b1 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem5.colliderect(ballRect)):
         map=map&0b11110
-        gems+=1
+        SirBall.gems+=1
         gemmap[8]=map
 
-    return gemmap, gems  
+    return gemmap  
     
-def stage15Gems(SirBall, gemmap, gems):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
+def stage15Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
     map=gemmap[9]
     gem1=pygame.Rect(9*w/12, 5*h/8, w/30, h/30)          
     gem2=pygame.Rect(10*w/12, 4*h/8, w/30, h/30) 
     gem3=pygame.Rect(9*w/12, 3*h/8, w/30, h/30)   
     gem4=pygame.Rect(9*w/12, 2*h/8, w/30, h/30) 
     gem5=pygame.Rect(3*w/5, h/6, w/30, h/30) 
-    if (map&0b10000 and gem1.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10000 and gem1.colliderect(ballRect)):
         map=map&0b1111
-        gems+=1
+        SirBall.gems+=1
         gemmap[9]=map
-    if (map&0b1000 and gem2.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1000 and gem2.colliderect(ballRect)):
         map=map&0b10111
-        gems+=1
+        SirBall.gems+=1
         gemmap[9]=map
-    if (map&0b100 and gem3.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b100 and gem3.colliderect(ballRect)):
         map=map&0b11011
-        gems+=1
+        SirBall.gems+=1
         gemmap[9]=map
-    if (map&0b10 and gem4.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b10 and gem4.colliderect(ballRect)):
         map=map&0b11101
-        gems+=1
+        SirBall.gems+=1
         gemmap[9]=map
-    if (map&0b1 and gem5.collidepoint(xDot+w/40,yDot+w/40)):
+    if (map&0b1 and gem5.colliderect(ballRect)):
         map=map&0b11110
-        gems+=1
+        SirBall.gems+=1
         gemmap[9]=map
 
-    return gemmap, gems 
+    return gemmap 
+    
+def stage16Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
+    map=gemmap[10]
+    gem1=pygame.Rect(w/3+w/40, 4*h/20, w/30, h/30)          
+    gem2=pygame.Rect(w/3+w/40, 12*h/20, w/30, h/30) 
+    gem3=pygame.Rect(20*w/30+w/40, 7*h/20, w/30, h/30)   
+    if (map&0b100 and gem1.colliderect(ballRect)):
+        map=map&0b11
+        SirBall.gems+=1
+        gemmap[10]=map
+    if (map&0b10 and gem2.colliderect(ballRect)):
+        map=map&0b101
+        SirBall.gems+=1
+        gemmap[10]=map
+    if (map&0b1 and gem3.colliderect(ballRect)):
+        map=map&0b110
+        SirBall.gems+=1
+        gemmap[10]=map
 
+
+    return gemmap 
+    
+def stage17Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
+    map=gemmap[11]
+    gem1=pygame.Rect(w/3+w/40, 44*h/200, w/30, h/30)          
+    gem2=pygame.Rect(w/3+w/4, 44*h/200, w/30, h/30) 
+    gem3=pygame.Rect(w/3+w/2, 44*h/200, w/30, h/30)   
+    if (map&0b100 and gem1.colliderect(ballRect)):
+        map=map&0b11
+        SirBall.gems+=1
+        gemmap[11]=map
+    if (map&0b10 and gem2.colliderect(ballRect)):
+        map=map&0b101
+        SirBall.gems+=1
+        gemmap[11]=map
+    if (map&0b1 and gem3.colliderect(ballRect)):
+        map=map&0b110
+        SirBall.gems+=1
+        gemmap[11]=map
+
+    return gemmap 
+    
+def stage18Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
+    map=gemmap[12]
+    gem1=pygame.Rect(5*w/10, 9*h/10-h/20, w/30, h/30)          
+    gem2=pygame.Rect(6*w/10, 9*h/10-h/20, w/30, h/30) 
+    gem3=pygame.Rect(7*w/10, 9*h/10-h/20, w/30, h/30) 
+    gem4=pygame.Rect(8*w/10, 9*h/10-h/20, w/30, h/30) 
+    
+    if (map&0b1000 and gem1.colliderect(ballRect)):
+        map=map&0b111
+        SirBall.gems+=1
+        gemmap[12]=map
+    if (map&0b100 and gem2.colliderect(ballRect)):
+        map=map&0b1011
+        SirBall.gems+=1
+        gemmap[12]=map
+    if (map&0b10 and gem3.colliderect(ballRect)):
+        map=map&0b1101
+        SirBall.gems+=1
+        gemmap[12]=map
+    if (map&0b1 and gem4.colliderect(ballRect)):
+        map=map&0b1110
+        SirBall.gems+=1
+        gemmap[12]=map
+
+    return gemmap 
+
+def stage19Gems(SirBall, gemmap):
+    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
+    map=gemmap[13]
+    gem1=pygame.Rect(13*w/20, 3*h/10, w/30, h/30)          
+    gem2=pygame.Rect(13*w/20, 4*h/10, w/30, h/30) 
+    gem3=pygame.Rect(13*w/20, 5*h/10, w/30, h/30) 
+    gem4=pygame.Rect(13*w/20, 6*h/10, w/30, h/30) 
+    gem5=pygame.Rect(8*w/20, 3*h/20, w/30, h/30)          
+    gem6=pygame.Rect(9*w/20, 3*h/20, w/30, h/30) 
+    gem7=pygame.Rect(10*w/20, 3*h/20, w/30, h/30) 
+    gem8=pygame.Rect(11*w/20, 3*h/20, w/30, h/30) 
+    gem9=pygame.Rect(6*w/15, 7*h/20, w/30, h/30)          
+    gem10=pygame.Rect(8*w/15, 7*h/20, w/30, h/30) 
+    
+    if (map&0b1000000000 and gem1.colliderect(ballRect)):
+        map=map&0b111111111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b100000000 and gem2.colliderect(ballRect)):
+        map=map&0b1011111111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b10000000 and gem3.colliderect(ballRect)):
+        map=map&0b1101111111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b1000000 and gem4.colliderect(ballRect)):
+        map=map&0b1110111111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b100000 and gem5.colliderect(ballRect)):
+        map=map&0b1111011111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b10000 and gem6.colliderect(ballRect)):
+        map=map&0b1111101111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b1000 and gem7.colliderect(ballRect)):
+        map=map&0b1111110111
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b100 and gem8.colliderect(ballRect)):
+        map=map&0b1111111011
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b10 and gem9.colliderect(ballRect)):
+        map=map&0b1111111101
+        SirBall.gems+=1
+        gemmap[13]=map
+    if (map&0b1 and gem10.colliderect(ballRect)):
+        map=map&0b1111111110
+        SirBall.gems+=1
+        gemmap[13]=map
+
+
+    return gemmap 
 
 
 

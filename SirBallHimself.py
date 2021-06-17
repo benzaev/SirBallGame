@@ -1,7 +1,7 @@
 #Ben Solomon
 #06/3/2021
 #Retro platforming game with a dark plot underneath
-#version 10.27
+#version 10.28
 
 #holds Sir ball, all of its attributes, and blits him to the screen
 
@@ -27,6 +27,7 @@ class sirBall:
         self.armed=armed
         self.prevX=0
         self.swordDir=1
+        self.gems=0
         
     def setxDot(self, value):
         self.xDot=value
