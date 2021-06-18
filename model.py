@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
 #Holds the model
 
@@ -55,6 +55,9 @@ EvilBanana=pygame.transform.scale(EvilBanana,(w//12,h//12))
 sign=pygame.image.load("Images/sign.png").convert_alpha()
 sign=pygame.transform.scale(sign,(w//9,h//6))
 
+fish=pygame.image.load("Images/fish.png").convert_alpha()
+fish=pygame.transform.scale(fish,(w//20,h//20))
+
 #Color constants
 BLACK = (  0,   0,   0)
 WHITE = (255, 255, 255)
@@ -65,6 +68,7 @@ LGREEN= (47, 237, 47)
 YELLOW=(255,255,0)
 GREY=(34,34,34)
 LGREY=(169,169,169)
+ORANGE=(255, 165, 0)
 
 #global objects that move around are stored here
 movingObjects=[]

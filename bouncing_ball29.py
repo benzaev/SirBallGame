@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
-#Update: add more levels
+#Update: entrance to battle sequence
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
@@ -68,6 +68,8 @@ def main():
                  
         #The Control. Does all moving parts
         interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame = control.controller(SirBall,keys,  interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame)
+        
+        #SirBall.armed=True
         
         #The View. Blits everything to the screen
         display.view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap)

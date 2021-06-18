@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
 #This blits everything
 
@@ -48,7 +48,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
     drawLazer()
     
     #test draw
-    #pygame.draw.rect(surface,model.RED,(w/40,h/13, w/8, h/3),1) 
+    #pygame.draw.rect(surface,model.RED,(25*w/240, 2*h/3, w/60, h/3),1) 
 
 
     #draws the dot      
@@ -196,6 +196,8 @@ def drawSpikes(stage):
         return stages.drawStageEighteenSpikes()
     elif stage>=19 and stage<100:
         return stages.drawStageMoreGemsSpikes()
+    elif stage==100:
+        return stages.drawStage100Spikes(Luis)
 
     else:
         return []

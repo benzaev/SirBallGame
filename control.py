@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
 #moves stuff around
 
@@ -134,6 +134,7 @@ def nextLevel(SirBall, wall_defeated, numMess, wall_mad, music):
         SirBall.setyDot(2*h/3-w/20)
         numMess=0
         model.resetMovingObjects()
+        SirBall.armed=True
     if(SirBall.stage==18 and door182.colliderect(ballRect) and SirBall.gems<50):
         SirBall.setstage(19)
         SirBall.setxDot(w/5)
@@ -147,8 +148,8 @@ def nextLevel(SirBall, wall_defeated, numMess, wall_mad, music):
         SirBall.setxDot(w/100)
         SirBall.setyDot(2*h/3-w/20)
         numMess=0
-        model.resetMovingObjects()
-    
+        model.resetMovingObjects()  
+        SirBall.armed=True
 
     
     return numMess, wall_mad, music
@@ -410,10 +411,11 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
     #if gets close to a character, begin interaction
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
-    (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6)):
+    (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
+    (xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
         interact=True
     #ends interaction after all messages shown
-    if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19):
+    if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or stage==100 and numMess>5):
         interact=False
     if(stage==10 and (numMess==20 or numMess==100000)):
         music=3
@@ -425,17 +427,54 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
         elif(keys[pygame.K_c] and not keys==prevKey):
             numMess+=1  
             
+    #Luis Marvin pushing stage 10
+    numMess= interactionPushing10(SirBall, numMess, numMessPrev)
+    
+    if(stage==100):
+        numMess=LuisBattleInteraction(SirBall, numMess, numMessPrev)
+    
+    return numMess, interact, music
+    
+def LuisBattleInteraction(SirBall, numMess, numMessPrev):
+    #talking to Luis and taking his fish
+    if(numMess==5 and SirBall.xDot<w/2+w/8):   #don't move on until Sir Ball finished moving
+        numMess=4
+    if((numMess==3 or numMess==4) and SirBall.xDot<w/2+w/8):   #keep moving Sir Ball
+        SirBall.setxDot(SirBall.xDot+w/200)
+    if(numMess==3 and SirBall.xDot+w/40>w/2):   #once half way, change to mad Luis
+        numMess+=1  
+    #fish falling!
+    if(numMess>=4 and Luis.fishY<2*h):
+        Luis.setFishY(Luis.fishY+h/200)
+
+    
+
+    #Luis Rising to battle
+    if(numMess==6 and Luis.y>h/3):
+        Luis.setY(Luis.y-h/200)
+    elif(numMess==6 and Luis.y<h/3):
+        numMess=7
+        Luis.setIsMad(True)
+
+
+                    
+    return numMess
+
+
+    
+#Moving the characters on stage 10
+def interactionPushing10(SirBall, numMess, numMessPrev):
     #Luis moving down stage 10
     Ly=Luis.getY()
-    if (stage==10 and numMess>=4 and Ly<75*h/100):
+    if (SirBall.stage==10 and numMess>=4 and Ly<75*h/100):
         Luis.setY(Ly+h/400)
     #wait for him to descend
-    if (stage==10 and numMess>11 and  numMess<900 and Ly<75*h/100):
+    if (SirBall.stage==10 and numMess>11 and  numMess<900 and Ly<75*h/100):
         numMess=numMessPrev
-    if (stage==10 and numMess==11 and Ly>75*h/100):
+    if (SirBall.stage==10 and numMess==11 and Ly>75*h/100):
         numMess+=1
     #Luis pushing Marvin stage 10
-    if (stage==10 and numMess>=16):
+    if (SirBall.stage==10 and numMess>=16):
         Lx=Luis.getX()
         Mx=Marvin.getX()
         My=Marvin.getY()
@@ -452,8 +491,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
             Luis.setX(2*w/3-w/7)  
             if(numMess==16):
                 numMess+=1
-    
-    return numMess, interact, music
+    return numMess
     
 #collects gems for Sir Ball
 def collectGem(SirBall, gemmap):  

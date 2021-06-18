@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
 #Holds the stages and has a couple auxillary classes for little objects
 
@@ -1304,7 +1304,7 @@ def drawStageMoreGems(SirBall):
         block=movingObject(1700, 0, w/20, h/60, WHITE, 2000, 0)
         model.addMovingObject(block) 
         #banana
-        banana=Banana(10*w/30, 20*h/50, 10*w/30, 16*w/30, 1, True, 80-(SirBall.stage-19)*3)
+        banana=Banana(10*w/30, 20*h/50, 10*w/30, 16*w/30, 1, True, 80+(SirBall.stage-19)*3)
         model.addMovingObject(banana)
         
         
@@ -1369,12 +1369,111 @@ def drawStage100():
     #static blocks
     #no going back
     blocks.append(pygame.Rect(0,0,w/1000,h))  
+    #no moving forward
+    blocks.append(pygame.Rect(999*w/1000,0,w/1000,h))  
     #start block
     pygame.draw.rect(surface,WHITE,(0,2*h/3,w/10,h/2),1) 
-    blocks.append(pygame.Rect(0,2*h/3,w/10,h/2))       
+    blocks.append(pygame.Rect(0,2*h/3,w/10,h/2))   
+    #low middle
+    pygame.draw.rect(surface,WHITE,(w/3+w/100,13*h/14,w/3,h/60),1) 
+    blocks.append(pygame.Rect(w/3+w/100,13*h/14,w/3,h/60))  
+    #high middle
+    pygame.draw.rect(surface,WHITE,(w/3+w/100,h/5,w/3,h/60),1) 
+    blocks.append(pygame.Rect(w/3+w/100,h/5,w/3,h/60)) 
+    #end block
+    pygame.draw.rect(surface,WHITE,(9*w/10,2*h/3,w/10,h/2),1) 
+    blocks.append(pygame.Rect(9*w/10,2*h/3,w/10,h/2))  
+    
+    #moving blocks
+    if(model.movingObjects==[]):
+        #moving upward first
+        block=movingObject(100, 0, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(100, 175, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(100, 350, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block) 
+        #moving upward second
+        block=movingObject(400, 0, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(400, 175, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block)   
+        block=movingObject(400, 350, w/20, h/60, WHITE, 500, 0)
+        model.addMovingObject(block) 
+        #moving along bottom carrying spikes
+        block=movingObject(0, 1860, w/40, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)   
+        block=movingObject(666, 1860, w/40, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block)   
+        block=movingObject(1332, 1860, w/40, h/60, WHITE, 2000, 3)
+        model.addMovingObject(block) 
+        #moves in a square      690 700     , 1250  1600
+        block=movingObject(690, 700, w/20, h/60, WHITE, 2000, 2)
+        model.addMovingObject(block) 
+    
+    #move in a square
+    if(model.movingObjects[9].x<=690 and model.movingObjects[9].y>=1600):
+        model.movingObjects[9].setDirection(1)
+    elif(model.movingObjects[9].x>=1250 and model.movingObjects[9].y>=1600):
+        model.movingObjects[9].setDirection(0)  
+    elif(model.movingObjects[9].x>=1250 and model.movingObjects[9].y<=700):
+        model.movingObjects[9].setDirection(3)  
+    elif(model.movingObjects[9].x<=690 and model.movingObjects[9].y<=700):
+        model.movingObjects[9].setDirection(2)  
+        
+    #draw moving blocks
+    for x in range(0, 10):
+        blocks.append(model.movingObjects[x].drawSelf())
 
 
     return blocks
+    
+def drawStage100Spikes(Luis):
+    spike=model.spike
+    spikeD=model.spikeD
+    spikeL=model.spikeL
+    spikeR=model.spikeR
+    #contains all the spikes so I can test collides
+    spikes=[] 
+    
+    #roof spikes
+    offset=-w/40
+    n=40
+    while(n>0):
+        surface.blit(spikeD, (offset, -h/30, w/20, h/20))
+        n-=1
+        offset+=w/40
+    spikes.append(pygame.Rect(0,0,w,h/30))
+    
+    #left side spikes
+    offset=2*h/3-h/40
+    n=10
+    while(n>0):
+        surface.blit(spikeR, (21*w/240, offset, w/20, h/20))
+        n-=1
+        offset+=h/23
+    spikes.append(pygame.Rect(25*w/240, 2*h/3, w/60, h/3))
+    
+    #right side spikes
+    offset=2*h/3-h/40
+    n=10
+    while(n>0):
+        surface.blit(spikeL, (173*w/200, offset, w/20, h/20))
+        n-=1
+        offset+=h/23
+    spikes.append(pygame.Rect(25*w/240, 2*h/3, w/60, h/3))
+
+    #more spikes only when Luis gets mad
+    if(Luis.isMad):
+        #spikes attatched to block
+        surface.blit(spike, ((model.movingObjects[6].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
+        spikes.append(pygame.Rect((model.movingObjects[6].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
+        surface.blit(spike, ((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
+        spikes.append(pygame.Rect((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
+        surface.blit(spike, ((model.movingObjects[8].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
+        spikes.append(pygame.Rect((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
+    
+    return spikes
     
     
     

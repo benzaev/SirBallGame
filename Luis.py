@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/27/2021
 #Retro platforming game with a dark plot underneath
-#version 10.28
+#version 10.29
 
 #This files is home to Luis
 
@@ -15,8 +15,16 @@ surface= model.surface
 
 Luis=pygame.image.load("Images/Luis.png").convert_alpha()
 Luis=pygame.transform.scale(Luis,(w//12,w//12))
+EvilLuis=pygame.image.load("Images/EvilLuis.png").convert_alpha()
+EvilLuis=pygame.transform.scale(EvilLuis,(w//12,w//12))
+fish=model.fish
+
 x=2*w/3-w/7
 y=-h/5
+
+fishY=4*h/5+h/15
+
+isMad=False
 
 def getX():
     return x
@@ -28,6 +36,12 @@ def setX(value):
 def setY(value):
     global y
     y=value
+def setIsMad(value):
+    global isMad
+    isMad=value
+def setFishY(value):
+    global fishY
+    fishY=value
 
 def interact(interact, numMess, stage):
     if (stage==1 and numMess<=15):
@@ -36,6 +50,80 @@ def interact(interact, numMess, stage):
         LuisSix(interact, numMess)
     if (stage==10 and numMess<=19):
         LuisTen(interact, numMess)
+    if (stage==100 and numMess<=5):
+        Luis100(interact, numMess)
+    if (stage==100 and numMess>5):
+        Luis100Battle(numMess)
+        
+        
+def Luis100Battle(numMess):
+    surface.blit(EvilLuis, (x, y))
+    surface.blit(fish, (x, fishY))
+
+
+        
+        
+def Luis100(interact, numMess):
+    if(numMess==0):
+        setX(w/2)
+        setY(4*h/5)
+    #the character will disappear after talking to
+    if(numMess<4):
+        surface.blit(Luis, (x, y))
+    else:
+        surface.blit(EvilLuis, (x, y))
+    if(numMess>=4):
+        surface.blit(fish, (x, fishY))
+    
+    if(interact):
+        #speech bubble        
+        pygame.draw.polygon(surface,model.WHITE,[(x,y),(2*w/5,4*h/5-w/10),(22*w/50,4*h/5-w/10)],3) 
+        pygame.draw.ellipse(surface,model.WHITE,(w/3,50*h/100, w/4, h/5),3)
+        pygame.draw.ellipse(surface,model.GREY,(w/3+1,50*h/100+1, w/4-2, h/5-2),0)
+        
+        if(numMess==0):
+            TwoBlit100("You made it with", "the 50 crystals!")
+        elif (numMess==1):
+            OneBlit100("Great job!")
+        elif(numMess==2):
+            ThreeBlit100("What?! You don't", "Actually believe Marvin,", "do you?!!")  
+        elif(numMess==3):
+            OneBlit100("He's a pathalogical liar!")
+        elif(numMess==4):
+            OneBlit100RED("MY FISH!!!!")
+        elif(numMess==5):
+            TwoBlit100RED("AAAAAAA", "You'll pay for that!!!")
+        
+        
+def OneBlit100(text):
+    textBounds=(w/3+w/8,60*h/100)
+    display.messagePrint(w//50,text,textBounds,model.WHITE)
+    
+def TwoBlit100(text1, text2):
+    textBounds=(w/3+w/8,58*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)  
+    textBounds=(w/3+w/8,63*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE) 
+    
+def ThreeBlit100(text1, text2, text3):
+    textBounds=(w/3+w/8,55*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)
+    textBounds=(w/3+w/8,60*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE)
+    textBounds=(w/3+w/8,65*h/100)
+    display.messagePrint(w//50,text3,textBounds,model.WHITE)  
+
+
+def OneBlit100RED(text):
+    textBounds=(w/3+w/8,60*h/100)
+    display.messagePrint(w//50,text,textBounds,model.RED)
+    
+def TwoBlit100RED(text1, text2):
+    textBounds=(w/3+w/8,58*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.RED)  
+    textBounds=(w/3+w/8,63*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.RED) 
+            
         
         
 def LuisTen(interact, numMess):
