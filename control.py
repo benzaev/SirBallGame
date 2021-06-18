@@ -412,7 +412,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
-    (xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
+    (stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
         interact=True
     #ends interaction after all messages shown
     if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or stage==100 and numMess>5):
