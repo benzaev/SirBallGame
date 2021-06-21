@@ -1,9 +1,9 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
-#Update: entrance to battle sequence
+#Update: Luis Battle Sequence
 
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'

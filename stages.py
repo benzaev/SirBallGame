@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #Holds the stages and has a couple auxillary classes for little objects
 
@@ -1471,7 +1471,7 @@ def drawStage100Spikes(Luis):
         surface.blit(spike, ((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
         spikes.append(pygame.Rect((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
         surface.blit(spike, ((model.movingObjects[8].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
-        spikes.append(pygame.Rect((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
+        spikes.append(pygame.Rect((model.movingObjects[8].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
     
     return spikes
     
@@ -1614,10 +1614,10 @@ class Banana:
         
 #lazer object that bananas shoot
 class Lazer:
-    def __init__(self, x, y, xDot, yDot):
+    def __init__(self, x, y, xTarget, yTarget):
         self.x=x
         self.y=y
-        self.deltaX, self.deltaY, =self.calcSlope(x, y, xDot, yDot)
+        self.deltaX, self.deltaY, =self.calcSlope(x, y, xTarget, yTarget)
         self.point1=(self.x, self.y)
         self.point2=(self.x+30*self.deltaX, self.y+30*self.deltaY)
         self.point3=(self.x+30*self.deltaX-10*self.deltaY, self.y+30*self.deltaY+10*self.deltaX)
@@ -1633,14 +1633,16 @@ class Lazer:
         self.point4=(self.x-10*self.deltaY, self.y+10*self.deltaX) 
             
     #calculates the slope of a line that goes 1 distance per move
-    def calcSlope(self, x, y, xDot, yDot):
-        slope=(yDot-y)/(xDot-x)
+    def calcSlope(self, x, y, xTarget, yTarget):
+        if(xTarget==x):
+            xTarget-=1
+        slope=(yTarget-y)/(xTarget-x)
         deltaX=1/math.sqrt((slope**2)+1)
         deltaY=math.sqrt(1-(deltaX**2))
-        if(xDot<x):
+        if(xTarget<x):
             slope*=-1
             deltaX=deltaX*(-1)
-        if(yDot<y):
+        if(yTarget<y):
             slope*=-1
             deltaY=deltaY*(-1)        
         return deltaX, deltaY

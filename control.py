@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #moves stuff around
 
@@ -16,12 +16,12 @@ h=model.h
 #all moving parts
 def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame):
     #master control
-   # if (keys[pygame.K_a] and not keys==prevKey):
+    #if (keys[pygame.K_a] and not keys==prevKey):
     #    SirBall.setstage(SirBall.stage+1)  
-     #   model.resetMovingObjects()
-   # if (keys[pygame.K_b] and not keys==prevKey):
+    #    model.resetMovingObjects()
+    #if (keys[pygame.K_b] and not keys==prevKey):
     #    SirBall.setstage(SirBall.stage-1)
-     #   model.resetMovingObjects()
+    #    model.resetMovingObjects()
 
     
     music=0
@@ -46,14 +46,19 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
         
         gemmap= collectGem(SirBall, gemmap)
         
-        rightToBearArms(SirBall)
+        music=rightToBearArms(SirBall, music)
         
         killEnemy(SirBall)
         
+        #for final battle
+        hitLuis(SirBall, frame)
+        
         shootLazers(SirBall, frame)
         
+        getRidOfDeadLasers()
+        
     #does interaction
-    numMess, interact, music = characterInteractions(SirBall, numMess, interact, keys, prevKey, music)
+    numMess, interact, music = characterInteractions(SirBall, numMess, interact, keys, prevKey, music, frame)
             
     #checks if goes through a door
     numMess, wall_mad, music= nextLevel(SirBall, wall_defeated, numMess, wall_mad, music)   
@@ -76,6 +81,12 @@ def shootLazers(SirBall, frame):
                 laser=display.stages.Lazer(q.x, q.y, xDot, yDot)
                 model.addMovingObject(laser)
                 q.setLastShot(frame)
+                
+def getRidOfDeadLasers():
+    for q in model.movingObjects:
+        if (isinstance(q, display.stages.Lazer)):
+            if(q.x<-w/2 or q.x>2*w or q.y<-h/2 or q.y>2*h):
+                q=None
 
 
 
@@ -95,9 +106,13 @@ def moveBlocks():
     for x in model.movingObjects:
         x.moveSelf()
         
-def rightToBearArms(SirBall):
-    if(SirBall.stage==16 and SirBall.xDot+w/40>w//10 and SirBall.xDot-w/30<w//10 and SirBall.yDot<4*h/10 and SirBall.yDot>4*h/10-h/10):
+def rightToBearArms(SirBall, music):
+    if(SirBall.stage==16 and SirBall.xDot+w/40>w//10 and SirBall.xDot-w/30<w//10 and SirBall.yDot<4*h/10 and SirBall.yDot>4*h/10-h/10 and not SirBall.armed):
         SirBall.setarmed(True)
+        music=4
+        
+    return music
+
     
 #checks if Sir Ball went through a door    
 def nextLevel(SirBall, wall_defeated, numMess, wall_mad, music):
@@ -192,6 +207,8 @@ def jumpDot(keys,SirBall):
     if (keys[pygame.K_SPACE] and not in_jump and not in_fall):
         SirBall.setin_jump(True)
         SirBall.setjump(1000)
+        SirBall.setLastHit(0)
+
         
     #if jumping currently, continue
     if (in_jump):
@@ -215,6 +232,7 @@ def fallingDot(SirBall):
     if (not SirBall.in_jump and SirBall.yDot<yMaxi-3*h/1000 and not SirBall.in_fall):
         SirBall.setfall(500)
         SirBall.setin_fall(True)
+        
     #if Sir Ball is falling, make him fall
     if(SirBall.in_fall):
         SirBall.setyDot(SirBall.yDot+(h/8000000)*(SirBall.fall-500)**2)
@@ -328,6 +346,9 @@ def moveRight(SirBall):
 #checks if hit bottom, ran into wall, or hit spikes 
 
 def respawn(xWall,wStage,wall_mad, wall_defeated, SirBall):
+    #ensures death counter only inc once
+    prevDeaths=SirBall.deaths
+    
     #hits floor
     if (SirBall.yDot+w/20>=h):
         resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
@@ -360,7 +381,10 @@ def respawn(xWall,wStage,wall_mad, wall_defeated, SirBall):
                 xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
                 laser.x=-100
                 laser.deltaX=0
-                    
+                
+    if(SirBall.deaths>prevDeaths):
+        SirBall.setdeaths(prevDeaths+1)
+                                        
     return xWall,wStage,wall_defeated
     
 #if Sir Ball has died, reset all the values here
@@ -396,14 +420,16 @@ def resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, hit_wall):
             break
             
     SirBall.prevX=-1
-    if(SirBall.gems>0):
+    
+    if(SirBall.gems>0 and not SirBall.stage==100):
         SirBall.gems=SirBall.gems-1
+        
     return xWall, wStage, wall_defeated
 
     
     
 
-def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
+def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, frame):
     xDot=SirBall.xDot
     yDot=SirBall.yDot
     stage=SirBall.stage
@@ -412,7 +438,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
-    (stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
+    (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
         interact=True
     #ends interaction after all messages shown
     if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or stage==100 and numMess>5):
@@ -422,21 +448,26 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music):
         numMess+=1
     if(interact):
         #check if want to skip talk or go to next page
-        if keys[pygame.K_s]:
+        if keys[pygame.K_s] and not stage==100:
             numMess=100000
         elif(keys[pygame.K_c] and not keys==prevKey):
             numMess+=1  
+            if(stage==100 and numMess==3):
+                music=5
             
     #Luis Marvin pushing stage 10
     numMess= interactionPushing10(SirBall, numMess, numMessPrev)
     
     if(stage==100):
-        numMess=LuisBattleInteraction(SirBall, numMess, numMessPrev)
+        if(not Luis.LuisDefeated):
+            numMess, music=LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music)
     
     return numMess, interact, music
     
-def LuisBattleInteraction(SirBall, numMess, numMessPrev):
+def LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music):
     #talking to Luis and taking his fish
+    if(numMess==4 and SirBall.xDot<w/2+w/8):   #don't move on until Sir Ball finished moving
+        numMess=3
     if(numMess==5 and SirBall.xDot<w/2+w/8):   #don't move on until Sir Ball finished moving
         numMess=4
     if((numMess==3 or numMess==4) and SirBall.xDot<w/2+w/8):   #keep moving Sir Ball
@@ -444,10 +475,8 @@ def LuisBattleInteraction(SirBall, numMess, numMessPrev):
     if(numMess==3 and SirBall.xDot+w/40>w/2):   #once half way, change to mad Luis
         numMess+=1  
     #fish falling!
-    if(numMess>=4 and Luis.fishY<2*h):
-        Luis.setFishY(Luis.fishY+h/200)
-
-    
+    if(numMess>=4 and not Luis.isMad and Luis.LuisObject<2*h):
+        Luis.setLuisObject(Luis.LuisObject+h/200)
 
     #Luis Rising to battle
     if(numMess==6 and Luis.y>h/3):
@@ -456,9 +485,67 @@ def LuisBattleInteraction(SirBall, numMess, numMessPrev):
         numMess=7
         Luis.setIsMad(True)
 
+    #Luis moving side to side
+    if(Luis.isMad and Luis.health>=1800):
+        numMess=Luis.SideToSideMid(numMess)  
+        Luis.QuadLaser(frame, 50)
+        
+    #Luis moving in a squre
+    if(Luis.isMad and Luis.health>=1600 and Luis.health<1800):
+        Luis.Square()
+        Luis.TargetLaser(SirBall, frame, 30)
 
-                    
-    return numMess
+            
+    #Luis moving up and down and back and forth
+    if(Luis.isMad and Luis.health>=1200 and Luis.health<1600):
+        Luis.ZigZag()
+        Luis.StarLaser(frame, 80)
+
+    #Luis back and forth up high
+    if(Luis.isMad and Luis.health>=800 and Luis.health<1200):
+        Luis.SideToSideHigh()
+        Luis.RotatingShot(frame, 20)
+        
+    if(Luis.isMad and Luis.health>=400 and Luis.health<800):
+        Luis.ZigZag()
+        Luis.StarLaser(frame, 50)
+        
+    if(Luis.isMad and Luis.health>0 and Luis.health<400):
+        Luis.Square()
+        Luis.RotatingLaserStar(SirBall, frame, 80)
+        
+    if(Luis.isMad and Luis.health<=0):
+        if(Luis.y<h+h/20):
+            Luis.setY(Luis.y+h/100)
+        else:
+            Luis.setLuisDefeated(True)
+            Luis.setIsMad(False)
+            music=6
+    
+
+    return numMess, music
+    
+def hitLuis(SirBall, frame):
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+    LuisRect=pygame.Rect(Luis.x, Luis.y, w/15, h/7)
+    if(ballRect.colliderect(LuisRect) and frame-50>SirBall.lastHit and Luis.isMad):
+        Luis.setHealth(Luis.health-100)
+        SirBall.setLastHit(frame)
+        if(Luis.health==1500 or Luis.health==700):
+            if(Luis.movmentDir==0):
+                Luis.setMovmentDir(1)
+            elif(Luis.movmentDir==2):
+                Luis.setMovmentDir(3)
+            elif(Luis.movmentDir==4):
+                Luis.setMovmentDir(5)
+            elif(Luis.movmentDir==6):
+                Luis.setMovmentDir(7)
+        if(Luis.health==1100):
+            Luis.setMovmentDir(0)
+            Luis.setLuisObject([0,0])
+        if(Luis.health==300):
+            Luis.setMovmentDir(4)
+            Luis.setLastShot([0,0])
 
 
     

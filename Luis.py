@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/27/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #This files is home to Luis
 
@@ -19,12 +19,26 @@ EvilLuis=pygame.image.load("Images/EvilLuis.png").convert_alpha()
 EvilLuis=pygame.transform.scale(EvilLuis,(w//12,w//12))
 fish=model.fish
 
+#chords
 x=2*w/3-w/7
 y=-h/5
 
-fishY=4*h/5+h/15
+#for fish falling animation
+LuisObject=4*h/5+h/15
 
+#for final battle
 isMad=False
+
+#health for final battle    2000
+health=2000
+
+#for timing laser shots
+lastShot=0
+
+#for final battle movment. Using the 7 point system with diagonals
+movmentDir=2
+
+LuisDefeated=False
 
 def getX():
     return x
@@ -39,9 +53,21 @@ def setY(value):
 def setIsMad(value):
     global isMad
     isMad=value
-def setFishY(value):
-    global fishY
-    fishY=value
+def setLuisObject(value):
+    global LuisObject
+    LuisObject=value
+def setHealth(value):
+    global health
+    health=value
+def setLastShot(value):
+    global lastShot
+    lastShot=value
+def setMovmentDir(value):
+    global movmentDir
+    movmentDir=value
+def setLuisDefeated(value):
+    global LuisDefeated
+    LuisDefeated=value
 
 def interact(interact, numMess, stage):
     if (stage==1 and numMess<=15):
@@ -58,8 +84,20 @@ def interact(interact, numMess, stage):
         
 def Luis100Battle(numMess):
     surface.blit(EvilLuis, (x, y))
-    surface.blit(fish, (x, fishY))
-
+    if(not isMad):
+        surface.blit(fish, (x, LuisObject))
+    
+    if(health<=0 and y<h+h/20):
+        #speech bubble        
+        pygame.draw.polygon(surface,model.WHITE,[(x,y),(x-w/100-w/40, y-h/10),(x+w/100-w/40,y-h/10)],3) 
+        pygame.draw.ellipse(surface,model.WHITE,(x-w/8,y-h/4, w/4, h/5),3)
+        pygame.draw.ellipse(surface,model.GREY,(x-w/8+1,y-h/4+1, w/4-2, h/5-1),0)
+        #shouting noooooo
+        text="YOU'LL REGRET THIS!!"
+        textBounds=(x, y-h/4+h/9)
+        display.messagePrint(w//40,text,textBounds,model.WHITE)
+        
+        
 
         
         
@@ -73,7 +111,7 @@ def Luis100(interact, numMess):
     else:
         surface.blit(EvilLuis, (x, y))
     if(numMess>=4):
-        surface.blit(fish, (x, fishY))
+        surface.blit(fish, (x, LuisObject))
     
     if(interact):
         #speech bubble        
@@ -314,3 +352,244 @@ def SixBlit3(text1, text2, text3):
     display.messagePrint(w//40,text2,textBounds,model.WHITE)
     textBounds=(53*w/120,65*h/100)
     display.messagePrint(w//40,text3,textBounds,model.WHITE)
+    
+    
+    
+    
+def SideToSideMid(numMess):
+    if(x<6*w/10 and numMess%2==1):
+        setX(x+w/200)
+    elif(x>3*w/10 and numMess%2==0):
+        setX(x-w/200)
+    else:
+        numMess+=1
+        
+    return numMess
+    
+def Square():
+    if(movmentDir==2):
+        if(x<6*w/10):
+            setX(x+w/200)
+        else:
+            setMovmentDir(4)
+    elif(movmentDir==4):
+        if(y<7*h/10):
+            setY(y+h/200)
+        else:
+            setMovmentDir(6)
+    elif(movmentDir==6):
+        if(x>3*w/10):
+            setX(x-w/200)
+        else:
+            setMovmentDir(0)
+    elif(movmentDir==0):
+        if(y>h/4):
+            setY(y-h/200)
+        else:
+            setMovmentDir(2)
+            
+        
+def ZigZag():
+    #up 
+    if(movmentDir==1):
+        if(x<8*w/10):
+            setX(x+w/1000)
+        else:
+            setMovmentDir(7)
+        if(y>h/20):
+            setY(y-h/200)
+        else:
+            setMovmentDir(3)
+    #down right
+    elif(movmentDir==3):
+        if(x<8*w/10):
+            setX(x+w/1000)
+        else:
+            setMovmentDir(5)
+        if(y<7*h/10):
+            setY(y+h/200)
+        else:
+            setMovmentDir(1)
+    #down left
+    elif(movmentDir==5):
+        if(x>1*w/10):
+            setX(x-w/1000)
+        else:
+            setMovmentDir(3)
+        if(y<7*h/10):
+            setY(y+h/200)
+        else:
+            setMovmentDir(7)
+    #up left
+    elif(movmentDir==7):
+        if(x>1*w/10):
+            setX(x-w/1000)
+        else:
+            setMovmentDir(1)
+        if(y>w/20):
+            setY(y-h/200)
+        else:
+            setMovmentDir(5)
+        
+def SideToSideHigh():
+    #up
+    if(movmentDir==0):
+        if(y>h/20):
+            setY(y-h/200)
+        else:
+            setMovmentDir(2)
+    #right
+    if(movmentDir==2):
+        if(x<8*w/10):
+            setX(x+w/200)
+        else:
+            setMovmentDir(6)
+    #left
+    if(movmentDir==6):
+        if(x>2*w/10):
+            setX(x-w/200)
+        else:
+            setMovmentDir(2)        
+        
+        
+def QuadLaser(frame, freq):
+    #quad laser   50
+    if(lastShot+freq<frame):
+        laser=display.stages.Lazer(x, y, 0, 0)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w/2, 0)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, 0)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w, h/2)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, h)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w/2, h)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, 0, h)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, 0, h/2)
+        #model.addMovingObject(laser)
+        setLastShot(frame)
+        
+def TargetLaser(SirBall, frame, freq):
+    #shoots at Sir Ball 30
+    if(lastShot+freq<frame):
+        laser=display.stages.Lazer(x, y, SirBall.xDot+w/40, SirBall.yDot+w/40)
+        model.addMovingObject(laser)
+        setLastShot(frame)
+        
+        
+def StarLaser(frame, freq):
+    #shoots laser in a star
+    if(lastShot+freq<frame):
+        laser=display.stages.Lazer(x, y, 0, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w/2, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, h/2)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w/2, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, 0, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, 0, h/2)
+        model.addMovingObject(laser)
+        setLastShot(frame)
+        
+def RotatingShot(frame, freq):
+    #shoots all around slowly rotating 
+    if(lastShot+freq<frame):
+        laser=display.stages.Lazer(x, y, LuisObject[0], LuisObject[1])
+        model.addMovingObject(laser)
+        #target moving down
+        if(LuisObject[0]<=0 and LuisObject[1]<h):
+            setLuisObject([LuisObject[0], LuisObject[1]+h//5])
+        #target moving to the right
+        elif(LuisObject[1]>=h and LuisObject[0]<w):
+            setLuisObject([LuisObject[0]+w//5, LuisObject[1]])
+        #target moving upward
+        elif(LuisObject[0]>=w and LuisObject[1]>0):
+            setLuisObject([LuisObject[0], LuisObject[1]-h//5])  
+        #skip back to top left
+        elif(LuisObject[0]>=w and LuisObject[1]<=0):
+            setLuisObject([0, 0])
+        setLastShot(frame)
+        
+        
+def RotatingLaserStar(SirBall, frame, freq):
+    #shoots laser in a star 80
+    if(lastShot[0]+freq<frame):
+        laser=display.stages.Lazer(x, y, 0, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w/2, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, h/2)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, w/2, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, 0, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(x, y, 0, h/2)
+        model.addMovingObject(laser)
+        setLastShot([frame, lastShot[1]])
+        
+    #shoots all around slowly rotating
+    if(lastShot[1]+freq/4<frame):
+        laser=display.stages.Lazer(x, y, LuisObject[0], LuisObject[1])
+        model.addMovingObject(laser)
+        #target moving down
+        if(LuisObject[0]<=0 and LuisObject[1]<h):
+            setLuisObject([LuisObject[0], LuisObject[1]+h//5])
+        #target moving to the right
+        elif(LuisObject[1]>=h and LuisObject[0]<w):
+            setLuisObject([LuisObject[0]+w//5, LuisObject[1]])
+        #target moving upward
+        elif(LuisObject[0]>=w and LuisObject[1]>0):
+            setLuisObject([LuisObject[0], LuisObject[1]-h//5])  
+        #skip back to top left
+        elif(LuisObject[0]>=w and LuisObject[1]<=0):
+            setLuisObject([0, 0])
+        setLastShot([lastShot[0], frame])
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

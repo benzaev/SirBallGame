@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #Holds the model
 
@@ -69,6 +69,12 @@ YELLOW=(255,255,0)
 GREY=(34,34,34)
 LGREY=(169,169,169)
 ORANGE=(255, 165, 0)
+
+#for the music
+prevTrack='Audio/Fallen_Reprise.wav'
+def swapTrack(track):
+    global prevTrack
+    prevTrack=track
 
 #global objects that move around are stored here
 movingObjects=[]

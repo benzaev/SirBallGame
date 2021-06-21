@@ -1,7 +1,7 @@
 #Ben Solomon
 #06/3/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #holds Sir ball, all of its attributes, and blits him to the screen
 
@@ -28,6 +28,8 @@ class sirBall:
         self.prevX=0
         self.swordDir=1
         self.gems=0
+        #only lets him hit Luis once every 40 frame
+        self.lastHit=0
         
     def setxDot(self, value):
         self.xDot=value
@@ -47,6 +49,8 @@ class sirBall:
         self.stage=value
     def setarmed(self, value):
         self.armed=value
+    def setLastHit(self, value):
+        self.lastHit=value
 
         
         

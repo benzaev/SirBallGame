@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.29
+#version 10.30
 
 #This blits everything
 
@@ -31,6 +31,9 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
     #the stage blocks
     drawStage(SirBall)
+    
+    #draws the health bar for the final battles
+    drawHealthBar()
    
     #blits character/messages
     characterBlit(SirBall.stage, interact,numMess)
@@ -48,7 +51,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
     drawLazer()
     
     #test draw
-    #pygame.draw.rect(surface,model.RED,(25*w/240, 2*h/3, w/60, h/3),1) 
+    #pygame.draw.rect(surface,model.RED,(Luis.x, Luis.y, w/15, h/7),1) 
 
 
     #draws the dot      
@@ -56,7 +59,19 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
         
     #music
-    playMusic(wall_mad,music)         
+    playMusic(wall_mad,music)    
+
+
+def drawHealthBar():
+    if(Luis.isMad and Luis.health>0):
+        pygame.draw.rect(surface,model.BLACK,(w/100, h/10, w/6, h/30),5) 
+        pygame.draw.rect(surface,model.RED,(w/100+3, h/10+3, Luis.health*w/12000-7, h/30-7),0) 
+
+        text="LUIS HEALTH "
+        textBounds=(14*w/150, 9*h/100)
+        messagePrint(w//80,text,textBounds,model.WHITE) 
+
+    
     
 #cycles through all moving objects and blits lazers to the screen
 def drawLazer():
@@ -76,19 +91,34 @@ def background(SirBall):
 
 
 #plays music. Skip allows new song to play before old one finishes
-    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins
+    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle
 def playMusic(wall_mad,skip):
     if (skip==1):
         track='Audio/Fallen_Reprise.wav'
         pygame.mixer.music.stop()
+        model.swapTrack('Audio/Fallen_Reprise.wav')
     elif(skip==2):
         track='Audio/Mad.wav'
         pygame.mixer.music.stop()
+        model.swapTrack('Audio/Mad.wav')
     elif(skip==3):
         track='Audio/Ruins.wav'
         pygame.mixer.music.stop()
+        model.swapTrack('Audio/Ruins.wav')
+    elif(skip==4):
+        track='Audio/Determination.wav'
+        pygame.mixer.music.stop()  
+        model.swapTrack('Audio/Determination.wav')
+    elif(skip==5):
+        track='Audio/LuisMadMusic.wav'
+        pygame.mixer.music.stop() 
+        model.swapTrack('Audio/LuisMadMusic.wav')
+    elif(skip==6):
+        track='Audio/MarvinMadMusic.wav'
+        pygame.mixer.music.stop()  
+        model.swapTrack('Audio/MarvinMadMusic.wav')
     elif(not pygame.mixer.music.get_busy()):
-        track='Audio/Fallen_Reprise.wav'
+        track=model.prevTrack
     else:
         return
         
