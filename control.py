@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.30
+#version 10.36
 
 #moves stuff around
 
@@ -19,92 +19,157 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
     #if (keys[pygame.K_a] and not keys==prevKey):
     #    SirBall.setstage(SirBall.stage+1)  
     #    model.resetMovingObjects()
-    #if (keys[pygame.K_b] and not keys==prevKey):
+    #if (keys[pygame.K_b] and not keys==prevKey): 
     #    SirBall.setstage(SirBall.stage-1)
     #    model.resetMovingObjects()
-
     
     music=0
-    moveBlocks()
-    #if not currently interacting with a character, continue on
-    if (not interact):
-        #wall mechanics
-        wall_mad,wall_defeated,xWall,wStage, music=wallMechanics(SirBall,xWall,wStage,wall_mad, wall_defeated, music)
-        
-        #moving the dot
-        gemmap=moveDot(keys,SirBall, gemmap)  
-                
-        #does a cute little jump action
-        jumpDot(keys,SirBall)
-        fallingDot(SirBall)
-        
-        #keeps dot on the line
-        stayOnLine(SirBall)
-        
-        #respawn
-        xWall,wStage,wall_defeated=respawn(xWall,wStage,wall_mad, wall_defeated, SirBall)   
-        
-        gemmap= collectGem(SirBall, gemmap)
-        
-        music=rightToBearArms(SirBall, music)
-        
-        killEnemy(SirBall)
-        
-        #for final battle
-        hitLuis(SirBall, frame)
-        
-        shootLazers(SirBall, frame)
-        
-        getRidOfDeadLasers()
-        
-    #does interaction
-    numMess, interact, music = characterInteractions(SirBall, numMess, interact, keys, prevKey, music, frame)
+
+    if(SirBall.exitTracker<5):
+        #if not currently interacting with a character, continue on
+        if (not interact):
+            #wall mechanics
+            wall_mad,wall_defeated,xWall,wStage, music=wallMechanics(SirBall,xWall,wStage,wall_mad, wall_defeated, music)
             
-    #checks if goes through a door
-    numMess, wall_mad, music= nextLevel(SirBall, wall_defeated, numMess, wall_mad, music)   
+            #moving the dot
+            gemmap=moveDot(keys,SirBall, gemmap)  
+                    
+            #does a cute little jump action
+            jumpDot(keys,SirBall)
+            fallingDot(SirBall)
+            
+            #keeps dot on the line
+            stayOnLine(SirBall)
+            
+            #respawn
+            xWall,wStage,wall_defeated=respawn(xWall,wStage,wall_mad, wall_defeated, SirBall)   
+            
+            gemmap= collectGem(SirBall, gemmap)
+            
+            music=rightToBearArms(SirBall, music)
+                        
+            #for final battle
+            hitLuis(SirBall, frame)
+            
+            gemmap, xWall, wStage, wall_defeated, wall_mad=dealWithMovingObjects(SirBall, frame, gemmap, xWall, wStage, wall_defeated, wall_mad)         
+                        
+        #does interaction
+        numMess, interact, music = characterInteractions(SirBall, numMess, interact, keys, prevKey, music, frame)
+                
+        #checks if goes through a door
+        numMess, wall_mad, music= nextLevel(SirBall, wall_defeated, numMess, wall_mad, music)   
         
+    interact=leaveTheShadows(keys, SirBall, prevKey, interact, frame)
+
     #allows for test KEYUP
     prevKey=keys
     
     frame+=1
     
     return interact, xWall, wStage, wall_mad, wall_defeated, numMess, prevKey, music, gemmap, frame
+    
+    
+#at the end of the game, verifies SirBall does the exit commands
+def leaveTheShadows(keys, SirBall, prevKey, interact, frame):
+    if(SirBall.stage==100 and Marvin.defeated==True and not SirBall.exitTracker==5):
+        if(not SirBall.in_jump and not SirBall.in_fall and SirBall.xDot>w/4 and SirBall.xDot<3*w/4 and SirBall.yDot>2*h/3):
+            if keys[pygame.K_RIGHT] and not keys==prevKey:
+                if(SirBall.exitTracker==0 or SirBall.exitTracker==2):
+                    SirBall.exitTracker+=1
+                else:
+                    SirBall.exitTracker=0
+            elif keys[pygame.K_LEFT] and not keys==prevKey:
+                if(SirBall.exitTracker==1 or SirBall.exitTracker==3):
+                    SirBall.exitTracker+=1
+                else:
+                    SirBall.exitTracker=0
+            elif keys[pygame.K_UP] and not keys==prevKey:
+                if(SirBall.exitTracker==4):
+                    SirBall.exitTracker+=1
+                    
+    if(SirBall.exitTracker==5 and SirBall.stage==100):
+        SirBall.setstage(101)
+        SirBall.setxDot(w/20)
+        SirBall.setyDot(YFloor(SirBall))
+        SirBall.setLastHit(frame)
+        SirBall.gems-=50
+        
+    if(SirBall.lastHit+100<frame and SirBall.exitTracker==5):
+        SirBall.setstage(102)
+        SirBall.exitTracker=0
 
 
-#shoots lazers at SirBall from bananas      x, y, xDot, yDot
-def shootLazers(SirBall, frame):
+    return interact
+
+
+#shoot lasers and gets rid of done used lasers, move objects
+#this is all done in a single loop in an attempt to make game run smoother
+def dealWithMovingObjects(SirBall, frame, gemmap, xWall, wStage, wall_defeated, wall_mad):
+    counter=0
     xDot=SirBall.xDot+w/40
     yDot=SirBall.yDot+w/40
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+
     for q in model.movingObjects:
-        if (isinstance(q, display.stages.Banana)):
+        if (isinstance(q, display.stages.Lazer)):
+            #if laser is out of screen, del it
+            if(q.x<-w/20 or q.x>w or q.y<-h/20 or q.y>h):
+                del model.movingObjects[counter]
+            #SirBall is hit by laser
+            elif(ballRect.collidepoint(q.point1) or ballRect.collidepoint(q.point2) or ballRect.collidepoint(q.point3) or ballRect.collidepoint(q.point4)):
+                xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+                del model.movingObjects[counter]
+        elif (isinstance(q, display.stages.Banana)):
+            #shoots banana's laser
             if (q.alive and q.lastShot+q.frequency<frame):
                 laser=display.stages.Lazer(q.x, q.y, xDot, yDot)
                 model.addMovingObject(laser)
                 q.setLastShot(frame)
-                
-def getRidOfDeadLasers():
-    for q in model.movingObjects:
-        if (isinstance(q, display.stages.Lazer)):
-            if(q.x<-w/2 or q.x>2*w or q.y<-h/2 or q.y>2*h):
-                q=None
-
-
-
-#tests if SirBall killed an enemy 
-def killEnemy(SirBall):
-    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
-    for x in model.movingObjects:
-        if (isinstance(x, display.stages.Banana)):
-            if(x.getBox().colliderect(ballRect) and x.alive):
+            if(SirBall.stage==100):
+                #resurects dead bananas on level 100
+                if (not q.alive and q.x<=-w/20 and not Marvin.defeated):
+                    q.setAlive(True)
+                elif(q.alive and Marvin.defeated):
+                    del model.movingObjects[counter]
+            #tests if SirBall kills an enemy
+            if(q.getBox().colliderect(ballRect) and q.alive):
                 if(SirBall.armed):
-                    x.setAlive(False)
-                    SirBall.gems+=1
+                    if(SirBall.stage==100):
+                        q.setAlive(False)
+                    else:
+                        del model.movingObjects[counter]
+                        SirBall.gems+=1
+                else:
+                    xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
+        #if standing on a moving object, move SirBall
+        elif (isinstance(q, display.stages.movingObject)):
+            #if Sir Ball is on a moving platform
+            if(SirBall.xDot+w/40>q.x*w/q.rate and SirBall.xDot+w/40<q.x*w/q.rate+q.width  and (SirBall.yDot+w/20)//1==q.y*h//q.rate):
+                if(q.direction==1 and moveRight(SirBall)):
+                    SirBall.setxDot(SirBall.xDot+4*w/q.rate)
+                    if(SirBall.xDot+w/20>w):
+                        SirBall.setxDot(0)
+                        SirBall.setstage(SirBall.stage+1)
+                        model.resetMovingObjects()
+                        SirBall.prevX=-1
+                        #if past stage 19, reset gemmap
+                        if(SirBall.stage>19):
+                            gemmap[13]=0b1111111111
+                elif(q.direction==3 and moveLeft(SirBall)):
+                    SirBall.setxDot(SirBall.xDot-4*w/q.rate)
+                    if(SirBall.xDot<0):
+                        SirBall.setxDot(w-w/20)
+                        SirBall.setstage(SirBall.stage-1)
+                        model.resetMovingObjects()
+                        SirBall.prevX=w
+        #moves all the moving objects
+        q.moveSelf()
+
                 
-                
-#moves all the movable blocks
-def moveBlocks():
-    for x in model.movingObjects:
-        x.moveSelf()
+        counter+=1
+        
+    return gemmap, xWall, wStage, wall_defeated, wall_mad
+
         
 def rightToBearArms(SirBall, music):
     if(SirBall.stage==16 and SirBall.xDot+w/40>w//10 and SirBall.xDot-w/30<w//10 and SirBall.yDot<4*h/10 and SirBall.yDot>4*h/10-h/10 and not SirBall.armed):
@@ -193,36 +258,40 @@ def wallMechanics (SirBall,xWall,wStage,wall_mad, wall_defeated, music):
     
 #perform cute jump animation, only for upward motion
 def jumpDot(keys,SirBall):
-    xDot=SirBall.xDot
-    yDot=SirBall.yDot
-    stage=SirBall.stage
-    in_jump=SirBall.in_jump
-    in_fall=SirBall.in_fall
-    jump=SirBall.jump
-
     #where is the roof?
     ceiling=YCeiling(SirBall)
-    
+        
     #if not currently jumping and you push space
-    if (keys[pygame.K_SPACE] and not in_jump and not in_fall):
-        SirBall.setin_jump(True)
-        SirBall.setjump(1000)
-        SirBall.setLastHit(0)
+    if (keys[pygame.K_SPACE] and not SirBall.in_jump):
+        if(not SirBall.in_fall):
+            SirBall.setin_jump(True)
+            SirBall.setjump(1000)
+            SirBall.setLastHit(0)
+
+        elif(SirBall.in_fall and SirBall.fall>320 and not SirBall.jump==100):
+            SirBall.setin_jump(True)
+            SirBall.setin_fall(False)
+            SirBall.setjump(1000)
+            SirBall.setLastHit(0)
 
         
     #if jumping currently, continue
-    if (in_jump):
+    if (SirBall.in_jump):
         #if going up, don't hit ceiling
-        if (jump<=1000 and jump>500):
-            SirBall.setyDot(yDot-((jump-500)**2)*h/5700000)
+        if (SirBall.jump<=1000 and SirBall.jump>500):
+            SirBall.setyDot(SirBall.yDot-((SirBall.jump-500)**2)*h/5700000)
             if (SirBall.yDot<ceiling):
                 SirBall.setyDot(ceiling)
                 SirBall.setin_jump(False)
+                SirBall.setjump(100)
         else:
+            SirBall.setjump(100)
             SirBall.setin_jump(False)
             
-        if(in_jump):
-            SirBall.setjump(jump-25)
+        if(SirBall.in_jump):
+            SirBall.setjump(SirBall.jump-25)
+
+
     
 #if the dot isn't on the groun, it falls to the ground
 def fallingDot(SirBall):
@@ -239,6 +308,7 @@ def fallingDot(SirBall):
         if (SirBall.yDot>=yMaxi):
             SirBall.setyDot(yMaxi)
             SirBall.setin_fall(False)
+            SirBall.setjump(200)
            
         SirBall.setfall(SirBall.fall-25)  
     
@@ -276,30 +346,7 @@ def YCeiling (SirBall):
 
     
 #moves dot left or right
-def moveDot(keys,SirBall, gemmap):
-    #checks to see if Sir Ball is on a moving platform
-    for q in model.movingObjects:
-        if (isinstance(q, display.stages.movingObject)):
-            #if Sir Ball is on a moving platform
-            if(SirBall.xDot+w/40>q.x*w/q.rate and SirBall.xDot+w/40<q.x*w/q.rate+q.width  and (SirBall.yDot+w/20)//1==q.y*h//q.rate):
-                if(q.direction==1 and moveRight(SirBall)):
-                    SirBall.setxDot(SirBall.xDot+4*w/q.rate)
-                    if(SirBall.xDot+w/20>w):
-                        SirBall.setxDot(0)
-                        SirBall.setstage(SirBall.stage+1)
-                        model.resetMovingObjects()
-                        SirBall.prevX=-1
-                        #if past stage 19, reset gemmap
-                        if(SirBall.stage>19):
-                            gemmap[13]=0b1111111111
-                elif(q.direction==3 and moveLeft(SirBall)):
-                    SirBall.setxDot(SirBall.xDot-4*w/q.rate)
-                    if(SirBall.xDot<0):
-                        SirBall.setxDot(w-w/20)
-                        SirBall.setstage(SirBall.stage-1)
-                        model.resetMovingObjects()
-                        SirBall.prevX=w
-    
+def moveDot(keys,SirBall, gemmap):    
     if (keys[pygame.K_RIGHT] and moveRight(SirBall)):
         if (SirBall.xDot+w/20)<w:
             SirBall.setxDot(SirBall.xDot+w/200)
@@ -358,29 +405,12 @@ def respawn(xWall,wStage,wall_mad, wall_defeated, SirBall):
         xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, True)
 
     #hits spikes
-    spikes=display.drawSpikes(SirBall.stage)
+    spikes=display.drawSpikes(SirBall)
     player= pygame.Rect(SirBall.xDot,SirBall.yDot+w/100,w/20,3*w/100)
     for x in spikes:
         if (x.colliderect(player)):
             xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
 
-
-    #if hits the enemy while unarmed
-    ballRect=pygame.Rect(SirBall.xDot+w/200,SirBall.yDot+w/200,w/25,w/25)
-    for x in model.movingObjects:
-        if (isinstance(x, display.stages.Banana)):
-            if(x.getBox().colliderect(ballRect) and x.alive):
-                if(not SirBall.armed):
-                    xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
-
-                            
-    #if SirBall is hit by a laser           
-    for laser in model.movingObjects:
-        if (isinstance(laser, display.stages.Lazer)):
-            if(ballRect.collidepoint(laser.point1) or ballRect.collidepoint(laser.point2) or ballRect.collidepoint(laser.point3) or ballRect.collidepoint(laser.point4)):
-                xWall, wStage, wall_defeated=resetForRespawn(SirBall, xWall, wStage, wall_defeated, wall_mad, False)
-                laser.x=-100
-                laser.deltaX=0
                 
     if(SirBall.deaths>prevDeaths):
         SirBall.setdeaths(prevDeaths+1)
@@ -434,37 +464,107 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, fra
     yDot=SirBall.yDot
     stage=SirBall.stage
     numMessPrev=numMess
+    #book collide for lvl 100
+    bookRect=pygame.Rect(6*w/10,h/10,w/20,h/11)
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
     #if gets close to a character, begin interaction
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
-    (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall)):
+    (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall and numMess==0) or
+    (SirBall.stage==100 and bookRect.colliderect(ballRect) and numMess<3 and Marvin.defeated)):
         interact=True
     #ends interaction after all messages shown
-    if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or stage==100 and numMess>5):
+    if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or (Marvin.defeated and numMess>=3)):
         interact=False
+    elif(stage==100 and (numMess==1026 or numMess==100000)):
+        interact=False
+        Marvin.setMad(True)
+        numMess+=1
     if(stage==10 and (numMess==20 or numMess==100000)):
         music=3
         numMess+=1
     if(interact):
         #check if want to skip talk or go to next page
-        if keys[pygame.K_s] and not stage==100:
+        if keys[pygame.K_s] and (not stage==100 or Luis.defeated):
             numMess=100000
         elif(keys[pygame.K_c] and not keys==prevKey):
             numMess+=1  
-            if(stage==100 and numMess==3):
+            if(stage==100 and numMess==3 and not Luis.defeated):
                 music=5
             
     #Luis Marvin pushing stage 10
     numMess= interactionPushing10(SirBall, numMess, numMessPrev)
     
     if(stage==100):
-        if(not Luis.LuisDefeated):
-            numMess, music=LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music)
-    
+        if(not Luis.defeated):
+            numMess, music, interact=LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music, interact)
+        elif(not Marvin.defeated or Marvin.mad):
+            numMess, music=MarvinBattleInteraction(numMess, music)
+            hitMarvin(SirBall, frame)
+
+        
     return numMess, interact, music
     
-def LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music):
+def MarvinBattleInteraction(numMess, music):
+    if(numMess==1000):
+        if(Marvin.x>9*w/10):
+            Marvin.setX(Marvin.x-w/200)
+        if(Marvin.x<=9*w/10):
+            numMess=1002
+    elif(numMess==1001):
+        numMess=1000
+        
+    #Marvin moving around
+    if(Marvin.mad and Marvin.health>=2700 and Marvin.health<=3000):
+        ZigZag(Marvin) 
+    elif(Marvin.mad and Marvin.health>=2500):
+        SideToSideHigh(Marvin)
+    elif(Marvin.mad and Marvin.health>=2000):
+        Square(Marvin)
+    elif(Marvin.mad and Marvin.health>=1600):
+        SideToSideMid(Marvin)
+    elif(Marvin.mad and Marvin.health>=1200):
+        Square(Marvin)
+    elif(Marvin.mad and Marvin.health>=900):
+        SideToSideLow(Marvin)
+    elif(Marvin.mad and Marvin.health>=500):
+        ZigZag(Marvin)
+    elif(Marvin.mad and Marvin.health>=300):
+        SideToSideMid(Marvin)
+    elif(Marvin.mad and Marvin.health>0):
+        SideToSideLow(Marvin)
+    elif(Marvin.mad and Marvin.health<=0):
+        Marvin.setDefeated(True)       
+        
+    if(Marvin.defeated and Marvin.mad):
+        if(Marvin.y<22*h/20):
+            Marvin.setY(Marvin.y+h/200)
+        else:
+            Marvin.setMad(False)
+            music=7 
+            numMess=0
+        
+    
+    return numMess, music
+    
+def hitMarvin(SirBall, frame):
+    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+    MarvinRect=pygame.Rect(Marvin.x, Marvin.y, w/15, h/7)
+    if(ballRect.colliderect(MarvinRect) and frame-50>SirBall.lastHit and Marvin.mad):
+        Marvin.setHealth(Marvin.health-100)
+        SirBall.setLastHit(frame)    
+        if(Marvin.health==2600):
+            Marvin.setDirection(0)
+        if(Marvin.health==1100):
+            Marvin.setDirection(2)
+        if(Marvin.health==800):
+            Marvin.setDirection(1)
+        if(Marvin.health==400):
+            Marvin.setDirection(2)
+    
+    
+def LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music, interact):
     #talking to Luis and taking his fish
     if(numMess==4 and SirBall.xDot<w/2+w/8):   #don't move on until Sir Ball finished moving
         numMess=3
@@ -475,76 +575,100 @@ def LuisBattleInteraction(SirBall, numMess, numMessPrev, frame, music):
     if(numMess==3 and SirBall.xDot+w/40>w/2):   #once half way, change to mad Luis
         numMess+=1  
     #fish falling!
-    if(numMess>=4 and not Luis.isMad and Luis.LuisObject<2*h):
+    if(numMess>=4 and not Luis.mad and Luis.LuisObject<2*h):
         Luis.setLuisObject(Luis.LuisObject+h/200)
 
     #Luis Rising to battle
     if(numMess==6 and Luis.y>h/3):
         Luis.setY(Luis.y-h/200)
+        interact=False
     elif(numMess==6 and Luis.y<h/3):
         numMess=7
-        Luis.setIsMad(True)
+        Luis.setMad(True)
+        Luis.setDirection(2)
 
     #Luis moving side to side
-    if(Luis.isMad and Luis.health>=1800):
-        numMess=Luis.SideToSideMid(numMess)  
-        Luis.QuadLaser(frame, 50)
+    if(Luis.mad and Luis.health>=1800):
+        SideToSideMid(Luis)  
+        QuadLaser(frame, 50, Luis)
         
     #Luis moving in a squre
-    if(Luis.isMad and Luis.health>=1600 and Luis.health<1800):
-        Luis.Square()
-        Luis.TargetLaser(SirBall, frame, 30)
+    if(Luis.mad and Luis.health>=1600 and Luis.health<1800):
+        Square(Luis)
+        TargetLaser(SirBall, frame, 30, Luis)
 
             
     #Luis moving up and down and back and forth
-    if(Luis.isMad and Luis.health>=1200 and Luis.health<1600):
-        Luis.ZigZag()
-        Luis.StarLaser(frame, 80)
+    if(Luis.mad and Luis.health>=1200 and Luis.health<1600):
+        ZigZag(Luis)
+        StarLaser(frame, 80, Luis)
 
     #Luis back and forth up high
-    if(Luis.isMad and Luis.health>=800 and Luis.health<1200):
-        Luis.SideToSideHigh()
-        Luis.RotatingShot(frame, 20)
+    if(Luis.mad and Luis.health>=800 and Luis.health<1200):
+        SideToSideHigh(Luis)
+        RotatingShot(frame, 20, Luis)
         
-    if(Luis.isMad and Luis.health>=400 and Luis.health<800):
-        Luis.ZigZag()
-        Luis.StarLaser(frame, 50)
+    if(Luis.mad and Luis.health>=400 and Luis.health<800):
+        ZigZag(Luis)
+        StarLaser(frame, 70, Luis)
         
-    if(Luis.isMad and Luis.health>0 and Luis.health<400):
-        Luis.Square()
-        Luis.RotatingLaserStar(SirBall, frame, 80)
+    if(Luis.mad and Luis.health>0 and Luis.health<400):
+        Square(Luis)
+        RotatingLaserStar(SirBall, frame, 100, Luis)
         
-    if(Luis.isMad and Luis.health<=0):
+    if(Luis.mad and Luis.health<=0):
         if(Luis.y<h+h/20):
             Luis.setY(Luis.y+h/100)
+        #Luis is Defeated. Prepare for Marvin fight
         else:
-            Luis.setLuisDefeated(True)
-            Luis.setIsMad(False)
+            Luis.setDefeated(True)
+            Luis.setMad(False)
             music=6
+            numMess=1000
+            interact=True
+            Marvin.setX(w)
+            Marvin.setY(h/2+3*h/60)
+            SirBall.setxDot(w/2)
+            SirBall.setyDot(YFloor(SirBall))
+            SirBall.prevX=0
+            offset=-w
+            n=10
+            dir=4
+            while(n>0):
+                #banana
+                banana=display.stages.Banana(offset, h/20, h/40, h/10, dir, True, 150)
+                model.addMovingObject(banana)
+                offset+=w/10
+                n-=1
+                if(dir==4):
+                    dir=5
+                else:
+                    dir=4
+
     
 
-    return numMess, music
+    return numMess, music, interact
     
 def hitLuis(SirBall, frame):
     ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
     LuisRect=pygame.Rect(Luis.x, Luis.y, w/15, h/7)
-    if(ballRect.colliderect(LuisRect) and frame-50>SirBall.lastHit and Luis.isMad):
+    if(ballRect.colliderect(LuisRect) and frame-50>SirBall.lastHit and Luis.mad):
         Luis.setHealth(Luis.health-100)
         SirBall.setLastHit(frame)
         if(Luis.health==1500 or Luis.health==700):
-            if(Luis.movmentDir==0):
-                Luis.setMovmentDir(1)
-            elif(Luis.movmentDir==2):
-                Luis.setMovmentDir(3)
-            elif(Luis.movmentDir==4):
-                Luis.setMovmentDir(5)
-            elif(Luis.movmentDir==6):
-                Luis.setMovmentDir(7)
+            if(Luis.direction==0):
+                Luis.setDirection(1)
+            elif(Luis.direction==2):
+                Luis.setDirection(3)
+            elif(Luis.direction==4):
+                Luis.setDirection(5)
+            elif(Luis.direction==6):
+                Luis.setDirection(7)
         if(Luis.health==1100):
-            Luis.setMovmentDir(0)
+            Luis.setDirection(0)
             Luis.setLuisObject([0,0])
         if(Luis.health==300):
-            Luis.setMovmentDir(4)
+            Luis.setDirection(4)
             Luis.setLastShot([0,0])
 
 
@@ -579,6 +703,239 @@ def interactionPushing10(SirBall, numMess, numMessPrev):
             if(numMess==16):
                 numMess+=1
     return numMess
+    
+    
+    
+def SideToSideMid(obj):
+    if(obj.direction==2):
+        if(obj.x<6*w/10):
+            obj.setX(obj.x+w/200)
+        else:
+            obj.setDirection(6)
+    elif(obj.direction==6):
+        if(obj.x>3*w/10):
+            obj.setX(obj.x-w/200)
+        else:
+            obj.setDirection(2)
+    else:
+        obj.setDirection(2)
+            
+def Square(obj):
+    if(obj.direction==2):
+        if(obj.x<6*w/10): 
+            obj.setX(obj.x+w/200)
+        else:
+            obj.setDirection(4)
+    elif(obj.direction==4):
+        if(obj.y<7*h/10):
+            obj.setY(obj.y+h/200)
+        else:
+            obj.setDirection(6)
+    elif(obj.direction==6):
+        if(obj.x>3*w/10):
+            obj.setX(obj.x-w/200)
+        else:
+            obj.setDirection(0)
+    elif(obj.direction==0):
+        if(obj.y>h/4):
+            obj.setY(obj.y-h/200)
+        else:
+            obj.setDirection(2)
+            
+        
+def ZigZag(obj):
+    #up 
+    if(obj.direction==1):
+        if(obj.x<8*w/10):
+            obj.setX(obj.x+w/1000)
+        else:
+            obj.setDirection(7)
+        if(obj.y>h/20):
+            obj.setY(obj.y-h/200)
+        else:
+            obj.setDirection(3)
+    #down right
+    elif(obj.direction==3):
+        if(obj.x<8*w/10):
+            obj.setX(obj.x+w/1000)
+        else:
+            obj.setDirection(5)
+        if(obj.y<7*h/10):
+            obj.setY(obj.y+h/200)
+        else:
+            obj.setDirection(1)
+    #down left
+    elif(obj.direction==5):
+        if(obj.x>1*w/10):
+            obj.setX(obj.x-w/1000)
+        else:
+            obj.setDirection(3)
+        if(obj.y<7*h/10):
+            obj.setY(obj.y+h/200)
+        else:
+            obj.setDirection(7)
+    #up left
+    elif(obj.direction==7):
+        if(obj.x>1*w/10):
+            obj.setX(obj.x-w/1000)
+        else:
+            obj.setDirection(1)
+        if(obj.y>w/20):
+            obj.setY(obj.y-h/200)
+        else:
+            obj.setDirection(5)
+        
+def SideToSideHigh(obj):
+    #up
+    if(obj.direction==0):
+        if(obj.y>h/20):
+            obj.setY(obj.y-h/200)
+        else:
+            obj.setDirection(2)
+    #right
+    if(obj.direction==2):
+        if(obj.x<8*w/10):
+            obj.setX(obj.x+w/200)
+        else:
+            obj.setDirection(6)
+    #left
+    if(obj.direction==6):
+        if(obj.x>2*w/10):
+            obj.setX(obj.x-w/200)
+        else:
+            obj.setDirection(2) 
+
+def SideToSideLow(obj):
+    #down
+    if(obj.y<8*h/10):
+        obj.setY(obj.y+h/200)
+    #right
+    elif(obj.direction==2):
+        if(obj.x<8*w/10):
+            obj.setX(obj.x+w/200)
+        else:
+            obj.setDirection(6)
+    #left
+    elif(obj.direction==6):
+        if(obj.x>2*w/10):
+            obj.setX(obj.x-w/200)
+        else:
+            obj.setDirection(2) 
+    
+        
+        
+def QuadLaser(frame, freq, obj):
+    #quad laser   50
+    if(obj.lastShot+freq<frame):
+        laser=display.stages.Lazer(obj.x, obj.y, 0, 0)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w/2, 0)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, 0)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w, h/2)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, h)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, w/2, h)
+        #model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, 0, h)
+        model.addMovingObject(laser)
+        #laser=display.stages.Lazer(Luis.x, Luis.y, 0, h/2)
+        #model.addMovingObject(laser)
+        obj.setLastShot(frame)
+        
+def TargetLaser(SirBall, frame, freq, obj):
+    #shoots at Sir Ball 30
+    if(obj.lastShot+freq<frame):
+        laser=display.stages.Lazer(obj.x,obj.y, SirBall.xDot+w/40, SirBall.yDot+w/40)
+        model.addMovingObject(laser)
+        obj.setLastShot(frame)
+        
+        
+def StarLaser(frame, freq, obj):
+    #shoots laser in a star
+    if(obj.lastShot+freq<frame):
+        laser=display.stages.Lazer(obj.x,obj.y, 0, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w/2, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, h/2)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w/2, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, 0, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, 0, h/2)
+        model.addMovingObject(laser)
+        obj.setLastShot(frame)
+        
+def RotatingShot(frame, freq, obj):
+    #shoots all around slowly rotating 
+    if(obj.lastShot+freq<frame):
+        laser=display.stages.Lazer(obj.x, obj.y, obj.LuisObject[0], obj.LuisObject[1])
+        model.addMovingObject(laser)
+        #target moving down
+        if(obj.LuisObject[0]<=0 and obj.LuisObject[1]<h):
+            obj.setLuisObject([obj.LuisObject[0], obj.LuisObject[1]+h//5])
+        #target moving to the right
+        elif(obj.LuisObject[1]>=h and obj.LuisObject[0]<w):
+            obj.setLuisObject([obj.LuisObject[0]+w//5, obj.LuisObject[1]])
+        #target moving upward
+        elif(obj.LuisObject[0]>=w and obj.LuisObject[1]>0):
+            obj.setLuisObject([obj.LuisObject[0], obj.LuisObject[1]-h//5])  
+        #skip back to top left
+        elif(obj.LuisObject[0]>=w and obj.LuisObject[1]<=0):
+            obj.setLuisObject([0, 0])
+        obj.setLastShot(frame)
+        
+        
+def RotatingLaserStar(SirBall, frame, freq, obj):
+    #shoots laser in a star 80
+    if(obj.lastShot[0]+freq<frame):
+        laser=display.stages.Lazer(obj.x, obj.y, 0, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w/2, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, 0)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, h/2)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, w/2, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, 0, h)
+        model.addMovingObject(laser)
+        laser=display.stages.Lazer(obj.x, obj.y, 0, h/2)
+        model.addMovingObject(laser)
+        obj.setLastShot([frame, obj.lastShot[1]])
+        
+    #shoots all around slowly rotating
+    if(obj.lastShot[1]+freq/4<frame):
+        laser=display.stages.Lazer(obj.x, obj.y, obj.LuisObject[0], obj.LuisObject[1])
+        model.addMovingObject(laser)
+        #target moving down
+        if(obj.LuisObject[0]<=0 and obj.LuisObject[1]<h):
+            obj.setLuisObject([obj.LuisObject[0], obj.LuisObject[1]+h//5])
+        #target moving to the right
+        elif(obj.LuisObject[1]>=h and obj.LuisObject[0]<w):
+            obj.setLuisObject([obj.LuisObject[0]+w//5, obj.LuisObject[1]])
+        #target moving upward
+        elif(obj.LuisObject[0]>=w and obj.LuisObject[1]>0):
+            obj.setLuisObject([obj.LuisObject[0], obj.LuisObject[1]-h//5])  
+        #skip back to top left
+        elif(obj.LuisObject[0]>=w and obj.LuisObject[1]<=0):
+            obj.setLuisObject([0, 0])
+        obj.setLastShot([obj.lastShot[0], frame])
+
+    
+        
+    
     
 #collects gems for Sir Ball
 def collectGem(SirBall, gemmap):  

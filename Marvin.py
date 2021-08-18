@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/27/2021
 #Retro platforming game with a dark plot underneath
-#version 10.30
+#version 10.36
 
 #This files is home to Marvin
 
@@ -16,8 +16,26 @@ surface= model.surface
 Marvin=pygame.image.load("Images/Marvin.png").convert_alpha()
 Marvin=pygame.transform.scale(Marvin,(w//12,w//12))
 
+EvilMarvin=pygame.image.load("Images/EvilMarvin.png").convert_alpha()
+EvilMarvin=pygame.transform.scale(EvilMarvin,(w//12,w//12))
+
+
 x=2*w/3-w/40
 y=78*h/100
+
+#for battle sequence
+#if fighting
+mad=False
+#if defeated
+defeated=False
+#decreases 100 each hit 3000
+health=3000
+#frame when last laser was shot
+lastShot=0
+#7 point diagonal direction system      7
+direction=7
+#for rotating laser fire
+LuisObject=[0,0]
 
 def getX():
     return x
@@ -29,10 +47,129 @@ def setX(value):
 def setY(value):
     global y
     y=value
+def setMad(value): 
+    global mad
+    mad=value
+def setLuisObject(value):
+    global LuisObject
+    LuisObject=value
+def setHealth(value):
+    global health
+    health=value
+def setLastShot(value):
+    global lastShot
+    lastShot=value
+def setDirection(value):
+    global direction
+    direction=value
+def setDefeated(value):
+    global defeated
+    defeated=value
 
-def interact(interact, numMess, stage):
+    
+
+
+def interact(interact, numMess, SirBall):
+    stage=SirBall.stage
     if (stage==10 and numMess<=19):
         MarvinTen(interact, numMess)
+    if (stage==100 and numMess>999):
+        Marvin100(interact, numMess, SirBall)
+        
+def Marvin100(interact, numMess, SirBall):
+    if(numMess<=1007):
+        surface.blit(Marvin, (x, y)) 
+    else:
+        surface.blit(EvilMarvin, (x,y))
+        
+    if(health<=0 and y<h+h/20):
+        #speech bubble        
+        pygame.draw.polygon(surface,model.WHITE,[(x,y),(x-w/100-w/40, y-h/10),(x+w/100-w/40,y-h/10)],3) 
+        pygame.draw.ellipse(surface,model.WHITE,(x-w/8,y-h/4, w/4, h/5),3)
+        pygame.draw.ellipse(surface,model.GREY,(x-w/8+1,y-h/4+1, w/4-2, h/5-1),0)
+        #shouting noooooo
+        text="NOOOOOOOOO"
+        textBounds=(x, y-h/4+h/9)
+        display.messagePrint(w//40,text,textBounds,model.WHITE)
+        
+        
+    
+    if(interact):
+        #speech bubble        
+        pygame.draw.polygon(surface,model.WHITE,[(x,y),(x-w/100-w/20, y-h/10),(x+w/100-w/20,y-h/10)],3) 
+        pygame.draw.ellipse(surface,model.WHITE,(x-w/5,y-h/4, w/4, h/5),3)
+        pygame.draw.ellipse(surface,model.GREY,(x-w/5+1,y-h/4+1, w/4-2, h/5-1),0)
+
+        if(numMess==1002): 
+            HundredBlit1("Well Well Well")
+        elif(numMess==1003):
+            HundredBlit2("Thanks for getting rid", "of Luis for me")
+        elif(numMess==1004):
+            HundredBlit2("He was becomming", "rather annoying")
+        elif(numMess==1005):
+            HundredBlit3("What?", "You still don't understand", "what's happening?")
+        elif(numMess==1006):
+            HundredBlit2("Allow me to change", "into something more")
+        elif(numMess==1007):
+            HundredBlit1("comfortable before explaining")
+        elif(numMess==1008):
+            HundredBlit1("Much better")
+        elif(numMess==1009):
+            HundredBlit1("You see...")
+        elif(numMess==1010):
+            HundredBlit2("Luis was only", "trying to help you")
+        elif(numMess==1011):
+            HundredBlit3("But you were", "foolish and did not", "heed his warnings")
+        elif(numMess==1012):
+            HundredBlit3("He wasn't the one", "planning on enslaving", "the Shadow Realm")
+        elif(numMess==1013):
+            HundredBlit1("I am!!!")
+        elif(numMess==1014):
+            HundredBlit3("HAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAH")
+        elif(numMess==1015):
+            HundredBlit2("But you messed with", "the one thing he loved")
+        elif(numMess==1016):
+            HundredBlit1("His precious fish")
+        elif(numMess==1017):
+            HundredBlit3("HAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAH")
+        elif(numMess==1018):
+            HundredBlit1("As you can see,")
+        elif(numMess==1019):
+            HundredBlit3("I've already enslaved", "a legion of bananas","to do my bidding")
+        elif(numMess==1020):
+            HundredBlit3("All I need are", str(SirBall.gems),"more gems")
+        elif(numMess==1021):
+            HundredBlit3("Before the entire", "Shadow Realm", "bends to my every whim!")
+        elif(numMess==1022):
+            HundredBlit1("In other words...")
+        elif(numMess==1023):
+            HundredBlit3("All I have to do", "is kill you, and", "take your crystals!!")
+        elif(numMess==1024):
+            HundredBlit3("HAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAHA", "HAHAHAHAHAHAHAHAH")
+        elif(numMess==1025):
+            HundredBlit2("Good luck", "Sir Ball")
+        
+        
+def HundredBlit1(text):
+    textBounds=(x-w/13, y-h/4+h/9)
+    display.messagePrint(w//50,text,textBounds,model.WHITE)
+        
+def HundredBlit2(text1, text2):
+    textBounds=(x-w/13,y-h/4+h/9-4*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)
+    textBounds=(x-w/13,y-h/4+h/9+2*h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE)
+        
+def HundredBlit3(text1, text2, text3):
+    textBounds=(x-w/13,y-h/4+h/9-6*h/100)
+    display.messagePrint(w//50,text1,textBounds,model.WHITE)
+    textBounds=(x-w/13,y-h/4+h/9-h/100)
+    display.messagePrint(w//50,text2,textBounds,model.WHITE)
+    textBounds=(x-w/13,y-h/4+h/9+4*h/100)
+    display.messagePrint(w//50,text3,textBounds,model.WHITE)
+        
+        
+
     
         
 def MarvinTen(interact, numMess):

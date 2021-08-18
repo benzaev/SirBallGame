@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.30
+#version 10.36
 
 #This blits everything
 
@@ -27,35 +27,36 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
     drawWall(SirBall.stage, wall_mad, xWall, wStage)
     
     #draws all the spikes
-    drawSpikes(SirBall.stage)
+    drawSpikes(SirBall)
 
     #the stage blocks
     drawStage(SirBall)
     
     #draws the health bar for the final battles
     drawHealthBar()
-   
-    #blits character/messages
-    characterBlit(SirBall.stage, interact,numMess)
 
     #blits gems
     gemBlit(SirBall.stage, gemmap)
 
-    #writes #deaths and gems
-    writeBasics(SirBall) 
-
     #draws acessories (like arrows and stuff)
     drawAcessories(SirBall,wall_mad,wall_defeated) 
+    
+    
+    #writes #deaths and gems
+    writeBasics(SirBall, interact) 
 
     #draw Lazers    
-    drawLazer()
+    drawLazer(SirBall)
     
     #test draw
-    #pygame.draw.rect(surface,model.RED,(Luis.x, Luis.y, w/15, h/7),1) 
+    #pygame.draw.rect(surface,model.WHITE,(6*w/10+w/90,h/10,w/20-w/45,h/11),1) 
 
 
     #draws the dot      
     drawDot(SirBall)
+    
+    #blits character/messages
+    characterBlit(SirBall, interact,numMess)
 
         
     #music
@@ -63,35 +64,52 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
 
 def drawHealthBar():
-    if(Luis.isMad and Luis.health>0):
+    if(Luis.mad and Luis.health>0):
         pygame.draw.rect(surface,model.BLACK,(w/100, h/10, w/6, h/30),5) 
         pygame.draw.rect(surface,model.RED,(w/100+3, h/10+3, Luis.health*w/12000-7, h/30-7),0) 
 
         text="LUIS HEALTH "
         textBounds=(14*w/150, 9*h/100)
         messagePrint(w//80,text,textBounds,model.WHITE) 
+        
+    elif(Marvin.mad and Marvin.health>0):
+        pygame.draw.rect(surface,model.BLACK,(w/100, h/10, w/6, h/30),5) 
+        pygame.draw.rect(surface,model.RED,(w/100+3, h/10+3, Marvin.health*w/18000-7, h/30-7),0) 
 
+        text="MARVIN HEALTH"
+        textBounds=(14*w/150, 9*h/100)
+        messagePrint(w//80,text,textBounds,model.WHITE) 
     
     
 #cycles through all moving objects and blits lazers to the screen
-def drawLazer():
+def drawLazer(SirBall):
     for x in model.movingObjects:
         if (isinstance(x, stages.Lazer)):
             x.drawSelf()
+    #also blit bananas on stage 100
+    if(SirBall.stage==100):
+        for x in model.movingObjects:
+            if (isinstance(x, stages.Banana)):
+                x.drawSelf()
             
 
 #blits background
 def background(SirBall):
-    if(not SirBall.stage==100):
-        DarkRealm= model.DarkRealm
-        surface.blit(DarkRealm, (0, 0))
-    else:
+    if(SirBall.stage<100):
+        Background= model.Background
+        surface.blit(Background, (0, 0))
+    elif(SirBall.stage==100):
         Altar=model.Altar
         surface.blit(Altar, (0, 0))
-
+    elif(SirBall.stage==101):
+        WhiteBackground= model.WhiteBackground
+        surface.blit(WhiteBackground, (0, 0))
+    elif(SirBall.stage==102):
+        Mountains= model.Mountains
+        surface.blit(Mountains, (0, 0))
 
 #plays music. Skip allows new song to play before old one finishes
-    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle
+    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle   7--> skyfall
 def playMusic(wall_mad,skip):
     if (skip==1):
         track='Audio/Fallen_Reprise.wav'
@@ -117,6 +135,10 @@ def playMusic(wall_mad,skip):
         track='Audio/MarvinMadMusic.wav'
         pygame.mixer.music.stop()  
         model.swapTrack('Audio/MarvinMadMusic.wav')
+    elif(skip==7):
+        track='Audio/Skyfall.wav'
+        pygame.mixer.music.stop()  
+        model.swapTrack('Audio/Skyfall.wav')
     elif(not pygame.mixer.music.get_busy()):
         track=model.prevTrack
     else:
@@ -125,15 +147,23 @@ def playMusic(wall_mad,skip):
     pygame.mixer.music.load(track)
     pygame.mixer.music.play()
     
-def writeBasics(SirBall):
-    text="Deaths "+str(SirBall.deaths)
-    textBounds=(18*w/20,h/20)
-    messagePrint(w//40,text,textBounds,model.LGREY) 
-    if(SirBall.stage>=6):
-        text="Crystals " + str(SirBall.gems)
-        textBounds=(w/15, h/20)
+def writeBasics(SirBall, interact):
+    if(not SirBall.stage==101):
+        text="Deaths "+str(SirBall.deaths)
+        textBounds=(18*w/20,h/20)
         messagePrint(w//40,text,textBounds,model.LGREY) 
-
+        if(SirBall.stage>=6):
+            text="Crystals " + str(SirBall.gems)
+            textBounds=(w/15, h/20)
+            messagePrint(w//40,text,textBounds,model.LGREY) 
+    #game over message
+    if(SirBall.stage==102):
+        text="GAME OVER"
+        textBounds=(w/2, h/3)
+        messagePrint(w//13,text,textBounds,model.BLACK) 
+        text="THANK YOU FOR PLAYING"
+        textBounds=(w/2, 2*h/3)
+        messagePrint(w//13,text,textBounds,model.BLACK) 
         
 
 def messagePrint(size,text,textB,color):
@@ -195,9 +225,16 @@ def drawStage(SirBall):
     #altar
     elif stage==100:
         return stages.drawStage100()
+    #white scene
+    elif stage==101:
+        return stages.drawStage101()
+    #conclusion screne
+    elif stage==102:
+        return stages.drawStage102()
 
         
-def drawSpikes(stage):
+def drawSpikes(SirBall):
+    stage=SirBall.stage 
     if stage==6:
         return stages.drawStageSixSpikes()
     elif stage==7:
@@ -227,7 +264,7 @@ def drawSpikes(stage):
     elif stage>=19 and stage<100:
         return stages.drawStageMoreGemsSpikes()
     elif stage==100:
-        return stages.drawStage100Spikes(Luis)
+        return stages.drawStage100Spikes(Luis, Marvin) 
 
     else:
         return []
@@ -306,10 +343,55 @@ def drawWall(stage, wall_mad, xWall, wStage):
     if(stage==wStage and wall_mad):
         pygame.draw.rect(surface,model.RED,(xWall,0,w,h),0)
     
-def characterBlit(stage, interact,numMess):      
+def characterBlit(SirBall, interact,numMess):     
     #luis
-    Luis.interact(interact, numMess, stage)
-    Marvin.interact(interact, numMess, stage)
+    Luis.interact(interact, numMess, SirBall.stage)
+    Marvin.interact(interact, numMess, SirBall)
+    
+    if(SirBall.stage==100 and (Marvin.defeated and not Marvin.mad) and SirBall.exitTracker<5):
+        if(interact):
+            surface.blit(model.bookOpen,(w/30, h/30))
+            bookText(numMess)
+            #drawing an arrow
+            if(numMess<=1):
+                pygame.draw.rect(surface,model.BLACK,(80*w/200+w/3, 60*h/200+h/2, 10*w/200, 4*h/200),0) 
+                pygame.draw.polygon(surface,model.BLACK,[(90*w/200+w/3, 58*h/200+h/2),(90*w/200+w/3, 66*h/200+h/2),(93*w/200+w/3, 62*h/200+h/2)],0)
+        elif(numMess<3):
+            surface.blit(model.bookClosed, (6*w/10, h/10))
+            
+def bookText(numMess):
+    if(numMess==0):
+        textBookPrint("To leave the Shadow Realm:", "Requires the sacrifice of 50 crystals", "", "Once the crystals are aquired,", "approach the the altar", "")
+    if(numMess==1):
+        textBookPrint("Once centered at the bottom", "of the altar, move as", "follows:","Right, Left, Right, Left", "Then press the Up Arrow", "")
+    if (numMess==2):
+        textBookPrint("If done correctly,", "You will rise back to the",  "world of the light", "", "", "")
+    
+
+def textBookPrint(text1, text2, text3, text4, text5, text6):
+    #left page
+    textBounds=(w/3,30*h/100)
+    textMessagePrint(w//50,text1,textBounds)
+    textBounds=(w/3,40*h/100)
+    textMessagePrint(w//50,text2,textBounds)
+    textBounds=(w/3,50*h/100)
+    textMessagePrint(w//50,text3,textBounds) 
+    #right page
+    textBounds=(2*w/3,30*h/100)
+    textMessagePrint(w//50,text4,textBounds)
+    textBounds=(2*w/3,40*h/100)
+    textMessagePrint(w//50,text5,textBounds)
+    textBounds=(2*w/3,50*h/100)
+    textMessagePrint(w//50,text6,textBounds) 
+    
+def textMessagePrint(size,text,textB):
+    #Text to screen
+    font=pygame.font.SysFont('Papyrus',size,False,False)
+    text=font.render(text,True,model.BLACK)  
+    textBounds=text.get_rect()
+    textBounds.center=textB
+    
+    surface.blit(text,textBounds)  
 
 
 def gemBlit(stage, gemmap):

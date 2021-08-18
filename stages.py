@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.30
+#version 10.36
 
 #Holds the stages and has a couple auxillary classes for little objects
 
@@ -991,9 +991,12 @@ def drawStageFifteen():
     elif(model.movingObjects[7].y>1800):
         model.movingObjects[7].setDirection(0)
     
-    #draws the block
-    for x in range (0, 9):
-        blocks.append(model.movingObjects[x].drawSelf())
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
         
         
     #image of the exit door
@@ -1060,11 +1063,15 @@ def drawStageSixteen(SirBall):
         model.addMovingObject(block) 
         block=movingObject(1300, 900, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block)
-        
-    model.movingObjects[0].drawSelf()
-    model.movingObjects[1].drawSelf()
-    blocks.append(model.movingObjects[2].drawSelf())
-    blocks.append(model.movingObjects[3].drawSelf())
+            
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
+
+
 
     return blocks
     
@@ -1136,12 +1143,12 @@ def drawStageSeventeen():
         model.addMovingObject(block)
         
     
-    model.movingObjects[0].drawSelf()
-    model.movingObjects[1].drawSelf()
-    
-    for x in range(2, 14):
-        blocks.append(model.movingObjects[x].drawSelf())
-
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
 
     return blocks
     
@@ -1220,13 +1227,12 @@ def drawStageEighteenteen():
         banana=Banana(15*w/30, 25*h/50, 23*h/50, 40*h/50, 2, True, 110)
         model.addMovingObject(banana)
         
-    #draw moving blocks
-    for x in range(0, 3):
-        blocks.append(model.movingObjects[x].drawSelf())
-        
-    #draw bananas
-    model.movingObjects[3].drawSelf()
-    model.movingObjects[4].drawSelf()
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
 
     return blocks
     
@@ -1320,12 +1326,12 @@ def drawStageMoreGems(SirBall):
         model.movingObjects[4].setDirection(1)    
         
         
-    #draw moving blocks
-    for x in range(0, 9):
-        blocks.append(model.movingObjects[x].drawSelf())
-        
-    #draw bananas
-    model.movingObjects[9].drawSelf()
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
     
     if(SirBall.gems>=50):
         #blits door    
@@ -1421,14 +1427,17 @@ def drawStage100():
     elif(model.movingObjects[9].x<=690 and model.movingObjects[9].y<=700):
         model.movingObjects[9].setDirection(2)  
         
-    #draw moving blocks
-    for x in range(0, 10):
-        blocks.append(model.movingObjects[x].drawSelf())
+    #draws the block/banana and returns hit box of block
+    for x in model.movingObjects:
+        if (isinstance(x, movingObject)):
+            blocks.append(x.drawSelf())
+        elif (isinstance(x, Banana)):
+            x.drawSelf()
 
 
     return blocks
     
-def drawStage100Spikes(Luis):
+def drawStage100Spikes(Luis, Marvin):
     spike=model.spike
     spikeD=model.spikeD
     spikeL=model.spikeL
@@ -1463,8 +1472,8 @@ def drawStage100Spikes(Luis):
         offset+=h/23
     spikes.append(pygame.Rect(25*w/240, 2*h/3, w/60, h/3))
 
-    #more spikes only when Luis gets mad
-    if(Luis.isMad):
+    #more spikes only when Luis or marvin gets mad
+    if(Luis.mad or Marvin.health<1200 and Marvin.health>0):
         #spikes attatched to block
         surface.blit(spike, ((model.movingObjects[6].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
         spikes.append(pygame.Rect((model.movingObjects[6].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
@@ -1472,11 +1481,40 @@ def drawStage100Spikes(Luis):
         spikes.append(pygame.Rect((model.movingObjects[7].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
         surface.blit(spike, ((model.movingObjects[8].x*w//2000-w/90), 1730*h/2000, w/30, h/30))    
         spikes.append(pygame.Rect((model.movingObjects[8].x*w//2000-w/90), 1730*h/2000, w/30, h/30))
-    
+        
     return spikes
     
     
+#Altar stage
+def drawStage101():
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #no going back
+    blocks.append(pygame.Rect(0,0,w/1000,h))  
+    #no moving forward
+    blocks.append(pygame.Rect(999*w/1000,0,w/1000,h))  
+    #start block
+    blocks.append(pygame.Rect(0,5*h/6,w,h/2))   
+
+
+    return blocks
     
+#Altar stage
+def drawStage102():
+    #contains all the blocks so I can test colides
+    blocks=[]       
+    #static blocks
+    #no going back
+    blocks.append(pygame.Rect(0,0,w/1000,h))  
+    #no moving forward
+    blocks.append(pygame.Rect(999*w/1000,0,w/1000,h))  
+    #start block
+    pygame.draw.rect(surface,WHITE,(0,5*h/6,w,h/2),1) 
+    blocks.append(pygame.Rect(0,5*h/6,w,h/2))   
+
+
+    return blocks
     
     
     
@@ -1555,7 +1593,7 @@ class movingObject:
             
 #(x,y)= location of banana
 #min/max =min/max value of x or y before changing directions
-#standard clockwise dir system: 0=up 1=right 2=down 3=left
+#standard clockwise dir system: 0=up 1=right 2=down 3=left. Addition: top RIGHT--> 4  bottom RIGHT--> 5 bottom LEFT--> 6    top LEFT--> 7
 #lastShot=frame when last lazer whas shot
 #frequency=how often to shoot a laser
 class Banana:
@@ -1576,18 +1614,40 @@ class Banana:
 
         
     def setX(self, value):
-        if(value>self.max):
-            self.setDir(3)
-        elif(value<self.min):
-            self.setDir(1)
+        if(self.dir==4 or self.dir==5):
+            if(value>w):
+                self.x=-w/20
+            else:
+                self.x=value
+
+        elif(self.dir==6 or self.dir==7):
+            if(value<-w/20):
+                self.x=21*w/20
+            else:
+                self.x=value
         else:
-            self.x=value
+            if(value>self.max):
+                self.setDir(3)
+            elif(value<self.min):
+                self.setDir(1)
+            else:
+                self.x=value
             
     def setY(self, value):
         if(value>self.max):
-            self.setDir(0)
+            if(self.dir==2):
+                self.setDir(0)
+            elif(self.dir==5):
+                self.setDir(4)
+            else:
+                self.setDir(7)
         elif(value<self.min):
-            self.setDir(2)
+            if(self.dir==0):
+                self.setDir(2)
+            elif(self.dir==4):
+                self.setDir(5)
+            else:
+                self.setDir(6)
         else:
             self.y=value 
             
@@ -1603,6 +1663,20 @@ class Banana:
             self.setY(self.y+h/300)
         elif(self.dir==3):
             self.setX(self.x-w/300)
+        elif(self.dir==4):
+            self.setY(self.y-h/200)
+            self.setX(self.x+w/500)
+        elif(self.dir==5):
+            self.setY(self.y+h/200)
+            self.setX(self.x+w/500)
+        elif(self.dir==6):
+            self.setY(self.y+h/200)
+            self.setX(self.x-w/500)
+        elif(self.dir==7):
+            self.setY(self.y-h/200)
+            self.setX(self.x-w/500)
+        
+            
             
     def drawSelf(self):
         if(self.alive):

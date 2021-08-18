@@ -1,7 +1,7 @@
 #Ben Solomon
 #04/26/2021
 #Retro platforming game with a dark plot underneath
-#version 10.30
+#version 10.36
 
 #Holds the model
 
@@ -16,11 +16,17 @@ w, h = pygame.display.get_surface().get_size()
 pygame.display.set_caption("Adventures of Sir BALL")
 
 #Load images
-DarkRealm= pygame.image.load("Images/The_Shadow_Realm.jpg")
-DarkRealm= pygame.transform.scale(DarkRealm, (w, h))
+Background= pygame.image.load("Images/The_Shadow_Realm.jpg")
+Background= pygame.transform.scale(Background, (w, h))
 
 Altar= pygame.image.load("Images/Altar.jpg")
 Altar= pygame.transform.scale(Altar, (w, h))
+
+WhiteBackground= pygame.image.load("Images/Black.png")
+WhiteBackground= pygame.transform.scale(WhiteBackground, (w, h))
+
+Mountains= pygame.image.load("Images/Mountain.png")
+Mountains= pygame.transform.scale(Mountains, (w, h))
 
 crystal=pygame.image.load("Images/crystal.png").convert_alpha()
 crystal=pygame.transform.scale(crystal,(w//30,w//30))
@@ -55,8 +61,14 @@ EvilBanana=pygame.transform.scale(EvilBanana,(w//12,h//12))
 sign=pygame.image.load("Images/sign.png").convert_alpha()
 sign=pygame.transform.scale(sign,(w//9,h//6))
 
-fish=pygame.image.load("Images/fish.png").convert_alpha()
+fish=pygame.image.load("Images/fish.png").convert_alpha()       
 fish=pygame.transform.scale(fish,(w//20,h//20))
+
+bookClosed=pygame.image.load("Images/bookClosed.png").convert_alpha()      
+bookClosed=pygame.transform.scale(bookClosed,(w//20,h//10))
+
+bookOpen=pygame.image.load("Images/bookOpen.png").convert_alpha()      
+bookOpen=pygame.transform.scale(bookOpen,(14*w//15,16*h//17))
 
 #Color constants
 BLACK = (  0,   0,   0)
