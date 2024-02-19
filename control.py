@@ -106,9 +106,9 @@ def leaveTheShadows(keys, SirBall, prevKey, interact, frame):
 #this is all done in a single loop in an attempt to make game run smoother
 def dealWithMovingObjects(SirBall, frame, gemmap, xWall, wStage, wall_defeated, wall_mad):
     counter=0
-    xDot=SirBall.xDot+w/40
-    yDot=SirBall.yDot+w/40
-    ballRect=pygame.Rect(SirBall.xDot,SirBall.yDot,w/20,h/11)
+    xDot = SirBall.xDot + w/40
+    yDot = SirBall.yDot + w/40
+    ballRect = pygame.Rect(SirBall.xDot, SirBall.yDot, w/20, h/11)
 
     for q in model.movingObjects:
         if (isinstance(q, display.stages.Lazer)):

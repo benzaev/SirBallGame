@@ -16,9 +16,9 @@ h= model.h
 surface= model.surface
 
 #projects to screen
-def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap):
+def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWall, wStage, music, gemmap, music_off):
     #makes mouse invisible while in the stages
-    pygame.mouse.set_visible(False)  
+    pygame.mouse.set_visible(True)  
     
    #background image
     background(SirBall)
@@ -45,6 +45,8 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
     #writes #deaths and gems
     writeBasics(SirBall, interact) 
 
+    drawMusicButton(music_off)
+
     #draw Lazers    
     drawLazer(SirBall)
     
@@ -60,7 +62,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
         
     #music
-    playMusic(wall_mad,music)    
+    playMusic(wall_mad,music, music_off)    
 
 
 def drawHealthBar():
@@ -79,6 +81,14 @@ def drawHealthBar():
         text="MARVIN HEALTH"
         textBounds=(14*w/150, 9*h/100)
         messagePrint(w//80,text,textBounds,model.WHITE) 
+
+# draws the button to turn on or off music
+def drawMusicButton(music_off):
+    if music_off:
+        surface.blit(model.audioOff, (0, h - 1*w//15))
+    else:
+        surface.blit(model.audioOn, (0, h - 1*w//15))
+
     
     
 #cycles through all moving objects and blits lazers to the screen
@@ -110,7 +120,10 @@ def background(SirBall):
 
 #plays music. Skip allows new song to play before old one finishes
     #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle   7--> skyfall
-def playMusic(wall_mad,skip):
+def playMusic(wall_mad,skip, off):
+    if (off):
+        pygame.mixer.music.pause()
+        return
     if (skip==1):
         track='Audio/Fallen_Reprise.wav'
         pygame.mixer.music.stop()
