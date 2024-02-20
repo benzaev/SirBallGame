@@ -262,7 +262,7 @@ def jumpDot(keys,SirBall):
     ceiling=YCeiling(SirBall)
         
     #if not currently jumping and you push space
-    if (keys[pygame.K_SPACE] and not SirBall.in_jump):
+    if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and not SirBall.in_jump:
         if(not SirBall.in_fall):
             SirBall.setin_jump(True)
             SirBall.setjump(1000)
@@ -347,7 +347,7 @@ def YCeiling (SirBall):
     
 #moves dot left or right
 def moveDot(keys,SirBall, gemmap):    
-    if (keys[pygame.K_RIGHT] and moveRight(SirBall)):
+    if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and moveRight(SirBall):
         if (SirBall.xDot+w/20)<w:
             SirBall.setxDot(SirBall.xDot+w/200)
         else:
@@ -358,7 +358,7 @@ def moveDot(keys,SirBall, gemmap):
             #if past stage 19, reset gemmap
             if(SirBall.stage>19):
                 gemmap[13]=0b1111111111
-    if (keys[pygame.K_LEFT] and moveLeft(SirBall)):
+    if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and moveLeft(SirBall):
         if (SirBall.xDot)>0:
             SirBall.setxDot(SirBall.xDot-w/200)
         else:
