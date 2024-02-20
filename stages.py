@@ -34,18 +34,18 @@ def drawStageOne():
     pygame.draw.rect(surface,WHITE,(23*w/25,9*h/10,2*w/25,h/5+1),1)  
     blocks.append(pygame.Rect(23*w/25,9*h/10,2*w/25,h/5+1))    
     #flat high 1
-    pygame.draw.rect(surface,WHITE,(w/2,2*h/5,w/10,w/60),3)  
+    pygame.draw.rect(surface,WHITE,(w/2,2*h/5,w/10,w/60),1)  
     blocks.append(pygame.Rect(w/2,2*h/5,w/10,w/60))   
     #flat high 2
-    pygame.draw.rect(surface,WHITE,(3*w/4,h/5,w/20,w/60),3)  
+    pygame.draw.rect(surface,WHITE,(3*w/4,h/5,w/20,w/60),1)  
     blocks.append(pygame.Rect(3*w/4,h/5,w/20,w/60))       
     
     #beefy verticle line
     pygame.draw.rect(surface,WHITE,(9*w/10,h/3,w/50,7*h/15),1)
     blocks.append(pygame.Rect(9*w/10,h/3,w/50,7*h/15))   
     #line on verticle line
-    pygame.draw.rect(surface,WHITE,(91*w/100-w/40,29*h/90,w/20,h/80),1)
-    blocks.append(pygame.Rect(91*w/100-w/40,29*h/90,w/20,h/80))  
+    pygame.draw.rect(surface,WHITE,(91*w/100-w/40,h/3-h/60,4*w/20,h/60),1)
+    blocks.append(pygame.Rect(91*w/100-w/40,h/3-h/60,4*w/20,h/60))  
 
     #button#
     #base
@@ -73,11 +73,11 @@ def drawStageTwo():
     pygame.draw.rect(surface,WHITE,(0,9*h/10,2*w/5,h/5+1),1)  
     blocks.append(pygame.Rect(0,9*h/10,2*w/5,h/5+1)) 
     #high first
-    pygame.draw.rect(surface,WHITE,(0,h/3,w/3,h/60),1)  
-    blocks.append(pygame.Rect(0,h/3,w/3,h/60))  
+    pygame.draw.rect(surface,WHITE,(0,h/3-h/60,w/3,h/60),1)  
+    blocks.append(pygame.Rect(0,h/3-h/60,w/3,h/60))  
     #first step
-    pygame.draw.rect(surface,WHITE,(8*w/20,18*h/30,w/8,h/60),1)  
-    blocks.append(pygame.Rect(8*w/20,18*h/30,w/8,h/60))
+    pygame.draw.rect(surface,WHITE,(8*w/20,18*h/30,5*w/32,h/60),1)  
+    blocks.append(pygame.Rect(8*w/20,18*h/30,5*w/32,h/60))
     #last high
     pygame.draw.rect(surface,WHITE,(2*w/3,h/3,w/3+1,h/60),1)  
     blocks.append(pygame.Rect(2*w/3,h/3,w/3+1,h/60))
@@ -186,8 +186,8 @@ def drawStageSix():
     pygame.draw.rect(surface,WHITE,(3*w/12,3*h/4,w/20,h/60),1) 
     blocks.append(pygame.Rect(3*w/12,3*h/4,w/20,h/60)) 
     #step 2
-    pygame.draw.rect(surface,WHITE,(46*w/100,h/2,w/20,h/60),1) 
-    blocks.append(pygame.Rect(46*w/100,h/2,w/20,h/60)) 
+    pygame.draw.rect(surface,WHITE,(40*w/100,h/2,5*w/60,h/60),1) 
+    blocks.append(pygame.Rect(40*w/100,h/2,5*w/60,h/60)) 
     #step 3
     pygame.draw.rect(surface,WHITE,(3*w/5,h/4,w/20,h/60),1) 
     blocks.append(pygame.Rect(3*w/5,h/4,w/20,h/60))      
@@ -472,15 +472,9 @@ def drawStageTen():
     #low first
     pygame.draw.rect(surface,WHITE,(0,9*h/10,w/15,h/5+1),1) 
     blocks.append(pygame.Rect(0,9*h/10,w/15,h/5+1)) 
-    #low 2
-    pygame.draw.rect(surface,WHITE,(2*w/15,9*h/10,w/15,h/5+1),1) 
-    blocks.append(pygame.Rect(2*w/15,9*h/10,w/15,h/5+1)) 
     #long low 3-6
-    pygame.draw.rect(surface,WHITE,(4*w/15,9*h/10,7*w/15,h/5+1),1) 
-    blocks.append(pygame.Rect(4*w/15,9*h/10,7*w/15,h/5+1))     
-    #low 7
-    pygame.draw.rect(surface,WHITE,(12*w/15,9*h/10,w/15,h/5+1),1) 
-    blocks.append(pygame.Rect(12*w/15,9*h/10,w/15,h/5+1))    
+    pygame.draw.rect(surface,WHITE,(2*w/15,9*h/10,11*w/15,h/5+1),1) 
+    blocks.append(pygame.Rect(2*w/15,9*h/10,11*w/15,h/5+1))     
     #low last
     pygame.draw.rect(surface,WHITE,(14*w/15,9*h/10,w/15,h/5+1),1) 
     blocks.append(pygame.Rect(14*w/15,9*h/10,w/15,h/5+1)) 
@@ -526,40 +520,41 @@ def drawStageEleven():
     if(len(model.movingObjects)==2):
         block3=movingObject(1333, 1333, w/20, h/60, WHITE, 2000, 1)
         model.addMovingObject(block3)
-    blocks.append(model.movingObjects[2].drawSelf())       
+    blocks.append(model.movingObjects[2].drawSelf())      
+
     #step -four 
-    pygame.draw.rect(surface, WHITE,(5*w/12-4*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12-4*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12-4*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-4*w/15, 11*h/30, w/40, h/60))
     #step -three 
-    pygame.draw.rect(surface, WHITE,(5*w/12-3*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12-3*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12-3*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-3*w/15, 11*h/30, w/40, h/60))
     #step -two 
-    pygame.draw.rect(surface, WHITE,(5*w/12-2*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12-2*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12-2*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-2*w/15, 11*h/30, w/40, h/60))
     #step -one 
-    pygame.draw.rect(surface, WHITE,(5*w/12-w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12-w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12-w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12-w/15, 11*h/30, w/40, h/60))
     #step two 
-    pygame.draw.rect(surface, WHITE,(5*w/12, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(w/4+w/6, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(w/4+w/6, 11*h/30, w/40, h/60))
     #step three 
-    pygame.draw.rect(surface, WHITE,(5*w/12+w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+w/15, 11*h/30, w/40, h/60))
     #step four
-    pygame.draw.rect(surface, WHITE,(5*w/12+2*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+2*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+2*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+2*w/15, 11*h/30, w/40, h/60))
     #step five
-    pygame.draw.rect(surface, WHITE,(5*w/12+3*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+3*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+3*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+3*w/15, 11*h/30, w/40, h/60))
     #step six
-    pygame.draw.rect(surface, WHITE,(5*w/12+4*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+4*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+4*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+4*w/15, 11*h/30, w/40, h/60))
     #step seven
-    pygame.draw.rect(surface, WHITE,(5*w/12+5*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+5*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+5*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+5*w/15, 11*h/30, w/40, h/60))
     #step eight
-    pygame.draw.rect(surface, WHITE,(5*w/12+6*w/15, 11*h/30, w/30, h/60), 1)
-    blocks.append(pygame.Rect(5*w/12+6*w/15, 11*h/30, w/30, h/60))
+    pygame.draw.rect(surface, WHITE,(5*w/12+6*w/15, 11*h/30, w/40, h/60), 1)
+    blocks.append(pygame.Rect(5*w/12+6*w/15, 11*h/30, w/40, h/60))
     #heighest
     pygame.draw.rect(surface,WHITE,(w/10,h/6,8*w/10,h/30),1) 
     blocks.append(pygame.Rect(w/10,39*h/40,8*w/10,h/5))
@@ -729,8 +724,8 @@ def drawStageThirteen():
     pygame.draw.rect(surface,WHITE,(0,3*h/12,w/6,h/30),1) 
     blocks.append(pygame.Rect(0,3*h/12,w/6,h/30))
     #end block
-    pygame.draw.rect(surface,WHITE,(10*w/11,h/2,w/5,h/60),1) 
-    blocks.append(pygame.Rect(10*w/11,h/2,w/5,h/60)) 
+    pygame.draw.rect(surface,WHITE,(19*w/22, h/2,w/4,h/60),1) 
+    blocks.append(pygame.Rect(9*w/11, h/2,w/4,h/60)) 
     
     #if need to instantiate moving objects
     if(model.movingObjects==[]):
@@ -847,6 +842,10 @@ def drawStageFourteen():
     
     pygame.draw.rect(surface,WHITE,(w/4+6*w/10,h/2,w/30,h/60),1) 
     blocks.append(pygame.Rect(w/4+6*w/10,h/2,w/30,h/60))
+
+    pygame.draw.rect(surface,WHITE,(w - 1, h/3, w/10, 2*h/3 + 3),1) 
+    blocks.append(pygame.Rect(w - 1, h/3, w/10, 2*h/3 + 3))
+
     
     #if need to instantiate the moving blocks
     if(model.movingObjects==[]):
@@ -979,7 +978,7 @@ def drawStageFifteen():
     #top oscillating block
     if(model.movingObjects[0].x>800):
         model.movingObjects[0].setDirection(3)
-    elif(model.movingObjects[0].x<340):
+    elif(model.movingObjects[0].x<250):
         model.movingObjects[0].setDirection(1)
     #up down spike carrier
     if(model.movingObjects[6].y<200):
@@ -1265,8 +1264,8 @@ def drawStageMoreGems(SirBall):
     #no going back
     blocks.append(pygame.Rect(0,0,w/1000,h))     
     #start block
-    pygame.draw.rect(surface,WHITE,(0,4*h/5,w/4,h/2),1) 
-    blocks.append(pygame.Rect(0,4*h/5,w/4,h/2)) 
+    pygame.draw.rect(surface,WHITE,(0,4*h/5,9*w/32,h/2),1) 
+    blocks.append(pygame.Rect(0,4*h/5,9*w/32,h/2)) 
     #high left
     pygame.draw.rect(surface,WHITE,(0,2*h/5,w/4,h/60),1) 
     blocks.append(pygame.Rect(0,2*h/5,w/4,h/60)) 
@@ -1276,6 +1275,9 @@ def drawStageMoreGems(SirBall):
     #high right
     pygame.draw.rect(surface,WHITE,(11*w/12,2*h/5,w/8,h/60),1) 
     blocks.append(pygame.Rect(11*w/12,2*h/5,w/4,h/60))
+    #block exit bottom
+    pygame.draw.rect(surface,WHITE,(118*w/120,2*h/5+h/60 + 1,2*w/120,h),1) 
+    blocks.append(pygame.Rect(118*w/120,2*h/5+h/60 + 1,2*w/120,h))
     #if have enough gems stop them from going farther
     if(SirBall.stage>=19 and SirBall.stage<100 and SirBall.gems>=50):
         blocks.append(pygame.Rect(999*w/1000, 0, w/1000, h))
@@ -1294,7 +1296,7 @@ def drawStageMoreGems(SirBall):
         block=movingObject(440, 0, w/20, h/60, WHITE, 1500, 2)
         model.addMovingObject(block) 
         #bottom oscilate
-        block=movingObject(600, 780, w/20, h/60, WHITE, 800, 1)
+        block=movingObject(600, 780, w/10, h/60, WHITE, 800, 1)
         model.addMovingObject(block)
         #middle oscilate
         block=movingObject(700, 1200, w/20, h/60, WHITE, 2000, 1)
@@ -1315,7 +1317,7 @@ def drawStageMoreGems(SirBall):
         
         
     #bottom oscillating block
-    if(model.movingObjects[3].x>755):
+    if(model.movingObjects[3].x>700):
         model.movingObjects[3].setDirection(3)
     elif(model.movingObjects[3].x<480):
         model.movingObjects[3].setDirection(1)

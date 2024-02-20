@@ -222,9 +222,6 @@ def LuisOne(interact, numMess):
         pygame.draw.ellipse(surface,model.WHITE,(3*w/5,44*h/100, w/4, h/5),3)
         pygame.draw.ellipse(surface,model.GREY,(3*w/5+1,44*h/100+1, w/4-2, h/5-2),0)
         #instructions
-        text="Press C to continue"
-        textBounds=(29*w/40,5*h/6)
-        display.messagePrint(w//40,text,textBounds,model.LGREY)
         text="Press S to skip"
         textBounds=(29*w/40,11*h/12)
         display.messagePrint(w//40,text,textBounds,model.LGREY)

@@ -73,17 +73,17 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
 def leaveTheShadows(keys, SirBall, prevKey, interact, frame):
     if(SirBall.stage==100 and Marvin.defeated==True and not SirBall.exitTracker==5):
         if(not SirBall.in_jump and not SirBall.in_fall and SirBall.xDot>w/4 and SirBall.xDot<3*w/4 and SirBall.yDot>2*h/3):
-            if keys[pygame.K_RIGHT] and not keys==prevKey:
+            if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not keys==prevKey:
                 if(SirBall.exitTracker==0 or SirBall.exitTracker==2):
                     SirBall.exitTracker+=1
                 else:
                     SirBall.exitTracker=0
-            elif keys[pygame.K_LEFT] and not keys==prevKey:
+            elif (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not keys==prevKey:
                 if(SirBall.exitTracker==1 or SirBall.exitTracker==3):
                     SirBall.exitTracker+=1
                 else:
                     SirBall.exitTracker=0
-            elif keys[pygame.K_UP] and not keys==prevKey:
+            elif (keys[pygame.K_UP] or keys[pygame.K_w] or keys[pygame.K_SPACE]) and not keys==prevKey:
                 if(SirBall.exitTracker==4):
                     SirBall.exitTracker+=1
                     
@@ -247,7 +247,7 @@ def wallMechanics (SirBall,xWall,wStage,wall_mad, wall_defeated, music):
         music=2
     #moves the wall
     if(wall_mad):
-        xWall-=w/220
+        xWall-=w/120
         if(xWall<=0):
             xWall=w
             wStage=wStage-1 
@@ -262,7 +262,7 @@ def jumpDot(keys,SirBall):
     ceiling=YCeiling(SirBall)
         
     #if not currently jumping and you push space
-    if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and not SirBall.in_jump:
+    if (keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]) and not SirBall.in_jump:
         if(not SirBall.in_fall):
             SirBall.setin_jump(True)
             SirBall.setjump(1000)
@@ -278,8 +278,8 @@ def jumpDot(keys,SirBall):
     #if jumping currently, continue
     if (SirBall.in_jump):
         #if going up, don't hit ceiling
-        if (SirBall.jump<=1000 and SirBall.jump>500):
-            SirBall.setyDot(SirBall.yDot-((SirBall.jump-500)**2)*h/5700000)
+        if (SirBall.jump<=1000 and SirBall.jump>600):
+            SirBall.setyDot(SirBall.yDot-((SirBall.jump-500)**2 * h/3000000))
             if (SirBall.yDot<ceiling):
                 SirBall.setyDot(ceiling)
                 SirBall.setin_jump(False)
@@ -289,7 +289,7 @@ def jumpDot(keys,SirBall):
             SirBall.setin_jump(False)
             
         if(SirBall.in_jump):
-            SirBall.setjump(SirBall.jump-25)
+            SirBall.setjump(SirBall.jump-50)
 
 
     
@@ -299,7 +299,7 @@ def fallingDot(SirBall):
     yMaxi=YFloor(SirBall)
     
     if (not SirBall.in_jump and SirBall.yDot<yMaxi-3*h/1000 and not SirBall.in_fall):
-        SirBall.setfall(500)
+        SirBall.setfall(400)
         SirBall.setin_fall(True)
         
     #if Sir Ball is falling, make him fall
@@ -310,7 +310,7 @@ def fallingDot(SirBall):
             SirBall.setin_fall(False)
             SirBall.setjump(200)
            
-        SirBall.setfall(SirBall.fall-25)  
+        SirBall.setfall(SirBall.fall-75)  
     
     
 #stay on lines methods here
@@ -326,7 +326,7 @@ def YFloor(SirBall):
     maxi=2*h
     blocks=display.drawStage(SirBall)
     for x in blocks:
-        if(x.left<=xDot and x.right>=xDot):
+        if(x.left<=(xDot+w/80) and x.right>=(xDot-w/80)):
             if(x.top<maxi and x.top>=yDot):
                 maxi=x.top
     return maxi-w/20
@@ -349,7 +349,7 @@ def YCeiling (SirBall):
 def moveDot(keys,SirBall, gemmap):    
     if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and moveRight(SirBall):
         if (SirBall.xDot+w/20)<w:
-            SirBall.setxDot(SirBall.xDot+w/200)
+            SirBall.setxDot(SirBall.xDot+w/100)
         else:
             SirBall.setxDot(0)
             SirBall.setstage(SirBall.stage+1)
@@ -360,7 +360,7 @@ def moveDot(keys,SirBall, gemmap):
                 gemmap[13]=0b1111111111
     if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and moveLeft(SirBall):
         if (SirBall.xDot)>0:
-            SirBall.setxDot(SirBall.xDot-w/200)
+            SirBall.setxDot(SirBall.xDot-w/100)
         else:
             if (SirBall.stage!=1):
                 SirBall.setxDot(w-w/20)
@@ -488,7 +488,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, fra
         #check if want to skip talk or go to next page
         if keys[pygame.K_s] and (not stage==100 or Luis.defeated):
             numMess=100000
-        elif(keys[pygame.K_c] and not keys==prevKey):
+        elif (keys[pygame.K_c] or keys[pygame.K_d] or keys[pygame.K_RIGHT]) and not keys==prevKey:
             numMess+=1  
             if(stage==100 and numMess==3 and not Luis.defeated):
                 music=5

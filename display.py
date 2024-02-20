@@ -287,14 +287,6 @@ def drawSpikes(SirBall):
 def drawAcessories(SirBall,wall_mad,wall_defeated):
     xDot=SirBall.xDot
     stage=SirBall.stage
-    #opening instructions
-    if(not wall_mad and not wall_defeated and stage==1):
-        text="MOVE LEFT AND RIGHT USING ARROW KEYS"
-        textBounds=(w/2,h/20)
-        messagePrint(w//50,text,textBounds,model.LGREY)
-        text="JUMP USING SPACEBAR"
-        textBounds=(w/2,h/20+h/30)
-        messagePrint(w//50,text,textBounds,model.LGREY)
     #instructions for meeting bananas
     if(stage==16):
         text="USE THE SWORD TO DESTROY THE BANANAS"
