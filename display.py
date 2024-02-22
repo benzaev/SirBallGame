@@ -85,9 +85,9 @@ def drawHealthBar():
 # draws the button to turn on or off music
 def drawMusicButton(music_off):
     if music_off:
-        surface.blit(model.audioOff, (0, h - 1*w//15))
+        surface.blit(model.audioOff, (5, h - w//30))
     else:
-        surface.blit(model.audioOn, (0, h - 1*w//15))
+        surface.blit(model.audioOn, (5, h - w//30))
 
     
     

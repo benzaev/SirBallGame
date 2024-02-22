@@ -71,10 +71,10 @@ bookOpen=pygame.image.load("Images/bookOpen.png").convert_alpha()
 bookOpen=pygame.transform.scale(bookOpen,(14*w//15,16*h//17))
 
 audioOn = pygame.image.load("Images/audio_on.png").convert_alpha()
-audioOn = pygame.transform.scale(audioOn,(1*w//15,1*w//15))
+audioOn = pygame.transform.scale(audioOn,(1*w//30,1*w//30))
 
 audioOff = pygame.image.load("Images/audio_off.png").convert_alpha()
-audioOff = pygame.transform.scale(audioOff,(1*w//15,1*w//15))
+audioOff = pygame.transform.scale(audioOff,(1*w//30,1*w//30))
 
 
 #Color constants

@@ -57,6 +57,7 @@ def main():
 
     #stage dot is on
     stage=1
+    
                                   #xpos, ypos, controls jump and fall ani, numdeath, stagenum, ifHasSword
     SirBall = SirBallHimself.sirBall(xDot, yDot, jump, in_jump, fall, in_fall, deaths, stage, False)
 
@@ -71,7 +72,7 @@ def main():
         # check if turning off/on the music
         if event.type == pygame.MOUSEBUTTONDOWN and not handled:
             x, y = event.pos
-            rect = pygame.Rect(0, h - 1*w//15, 1*w//15,1*w//15)
+            rect = pygame.Rect(5, h - w//30, w//30,w//30)
             handled = True
 
             if rect.collidepoint(x, y):

@@ -59,7 +59,7 @@ def controller(SirBall, keys, interact, xWall, wStage, wall_mad, wall_defeated, 
         #checks if goes through a door
         numMess, wall_mad, music= nextLevel(SirBall, wall_defeated, numMess, wall_mad, music)   
         
-    interact=leaveTheShadows(keys, SirBall, prevKey, interact, frame)
+    # interact=leaveTheShadows(keys, SirBall, prevKey, interact, frame)
 
     #allows for test KEYUP
     prevKey=keys
@@ -471,9 +471,15 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, fra
     if((stage==10 and xDot>=4*w/15 and xDot<8*w/15 and yDot>=9*h/10-w/20 and numMess<=19) or 
     (xDot>=3*w/5 and xDot<9*w/10  and yDot>=4*h/5-w/20 and numMess<=15 and stage==1) or 
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
-    (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall and numMess==0) or
-    (SirBall.stage==100 and bookRect.colliderect(ballRect) and numMess<3 and Marvin.defeated)):
+    (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall and numMess==0 and not Marvin.defeated)):
         interact=True
+    
+    # touch the book and leave
+    if SirBall.stage==100 and bookRect.colliderect(ballRect) and Marvin.defeated:
+        music=7 
+        SirBall.setstage(102)
+
+        
     #ends interaction after all messages shown
     if(stage==1 and numMess>15 or stage==6 and numMess>19 or stage==10 and numMess>19 or (Marvin.defeated and numMess>=3)):
         interact=False
@@ -542,7 +548,6 @@ def MarvinBattleInteraction(numMess, music):
             Marvin.setY(Marvin.y+h/200)
         else:
             Marvin.setMad(False)
-            music=7 
             numMess=0
         
     
