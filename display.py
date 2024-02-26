@@ -67,7 +67,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
 def drawHealthBar():
     if(Luis.mad and Luis.health>0):
-        pygame.draw.rect(surface,model.BLACK,(w/100, h/10, w/6, h/30),5) 
+        pygame.draw.rect(surface,model.GREY,(w/100, h/10, w/6, h/30),5) 
         pygame.draw.rect(surface,model.RED,(w/100+3, h/10+3, Luis.health*w/12000-7, h/30-7),0) 
 
         text="LUIS HEALTH "
@@ -75,7 +75,7 @@ def drawHealthBar():
         messagePrint(w//80,text,textBounds,model.WHITE) 
         
     elif(Marvin.mad and Marvin.health>0):
-        pygame.draw.rect(surface,model.BLACK,(w/100, h/10, w/6, h/30),5) 
+        pygame.draw.rect(surface,model.GREY,(w/100, h/10, w/6, h/30),5) 
         pygame.draw.rect(surface,model.RED,(w/100+3, h/10+3, Marvin.health*w/18000-7, h/30-7),0) 
 
         text="MARVIN HEALTH"
@@ -176,7 +176,7 @@ def writeBasics(SirBall, interact):
         messagePrint(w//13,text,textBounds,model.BLACK) 
         text="THANK YOU FOR PLAYING"
         textBounds=(w/2, 2*h/3)
-        messagePrint(w//13,text,textBounds,model.BLACK) 
+        messagePrint(w//13,text,textBounds,model.WHITE) 
         
 
 def messagePrint(size,text,textB,color):

@@ -477,6 +477,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, fra
     # touch the book and leave
     if SirBall.stage==100 and bookRect.colliderect(ballRect) and Marvin.defeated:
         music=7 
+        SirBall.gems-=50
         SirBall.setstage(102)
 
         

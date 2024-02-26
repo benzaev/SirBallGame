@@ -25,7 +25,7 @@ Altar= pygame.transform.scale(Altar, (w, h))
 WhiteBackground= pygame.image.load("Images/Black.png")
 WhiteBackground= pygame.transform.scale(WhiteBackground, (w, h))
 
-Mountains= pygame.image.load("Images/Mountain.png")
+Mountains= pygame.image.load("Images/Mountain.jpg")
 Mountains= pygame.transform.scale(Mountains, (w, h))
 
 crystal=pygame.image.load("Images/crystal.png").convert_alpha()
