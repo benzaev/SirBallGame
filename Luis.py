@@ -30,7 +30,7 @@ LuisObject=4*h/5+h/15
 mad=False
 
 #health for final battle    2000
-health=2000 
+health=2000
 
 #for timing laser shots
 lastShot=0

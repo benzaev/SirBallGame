@@ -1701,8 +1701,8 @@ class Lazer:
 
         
     def moveSelf(self):
-        self.x+=self.deltaX*10
-        self.y+=self.deltaY*10
+        self.x+=self.deltaX*20
+        self.y+=self.deltaY*20
         self.point1=(self.x, self.y)
         self.point2=(self.x+30*self.deltaX, self.y+30*self.deltaY)
         self.point3=(self.x+30*self.deltaX-10*self.deltaY, self.y+30*self.deltaY+10*self.deltaX)
