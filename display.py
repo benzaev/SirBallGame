@@ -62,7 +62,7 @@ def view(SirBall, interact, numMess, keys, prevKey, wall_mad, wall_defeated, xWa
 
         
     #music
-    playMusic(wall_mad,music, music_off)    
+    playMusic(music, music_off, interact)    
 
 
 def drawHealthBar():
@@ -119,41 +119,60 @@ def background(SirBall):
         surface.blit(Mountains, (0, 0))
 
 #plays music. Skip allows new song to play before old one finishes
-    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle   7--> skyfall
-def playMusic(wall_mad,skip, off):
+    #skip: 0--> Do nothing  1--> Fallen_Reprise    2--> Mad     3--> Ruins  4--> Determination      5--> Luis battle       6--> Marvin Battle   7--> skyfall  8--> interaction
+def playMusic(skip, off, interact):
+    
     if (off):
         pygame.mixer.music.pause()
         return
+    
+    # if not interacting but interacting music, reset
+    if not interact and model.interact:
+        track = model.prevTrack
+        skip = 0
+        model.interact = False
+        pygame.mixer.music.stop()
+
+
     if (skip==1):
         track='Audio/Fallen_Reprise.wav'
         pygame.mixer.music.stop()
-        model.swapTrack('Audio/Fallen_Reprise.wav')
+        model.swapTrack('Audio/Fallen_Reprise.wav', False)
     elif(skip==2):
         track='Audio/Mad.wav'
         pygame.mixer.music.stop()
-        model.swapTrack('Audio/Mad.wav')
+        model.swapTrack('Audio/Mad.wav', False)
     elif(skip==3):
         track='Audio/Ruins.wav'
         pygame.mixer.music.stop()
-        model.swapTrack('Audio/Ruins.wav')
+        model.swapTrack('Audio/Ruins.wav', False)
     elif(skip==4):
         track='Audio/Determination.wav'
         pygame.mixer.music.stop()  
-        model.swapTrack('Audio/Determination.wav')
+        model.swapTrack('Audio/Determination.wav', False)
     elif(skip==5):
         track='Audio/LuisMadMusic.wav'
         pygame.mixer.music.stop() 
-        model.swapTrack('Audio/LuisMadMusic.wav')
+        model.swapTrack('Audio/LuisMadMusic.wav', False)
     elif(skip==6):
         track='Audio/MarvinMadMusic.wav'
         pygame.mixer.music.stop()  
-        model.swapTrack('Audio/MarvinMadMusic.wav')
+        model.swapTrack('Audio/MarvinMadMusic.wav', False)
     elif(skip==7):
         track='Audio/Skyfall.wav'
         pygame.mixer.music.stop()  
-        model.swapTrack('Audio/Skyfall.wav')
+        model.swapTrack('Audio/Skyfall.wav', False)
+
+    elif skip == 8 and interact and not model.interact:
+        track='Audio/QuestionableSirBallLewisTheme.wav'
+        pygame.mixer.music.stop() 
+        model.swapTrack(model.prevTrack, True)
+
     elif(not pygame.mixer.music.get_busy()):
-        track=model.prevTrack
+        if interact:
+            track = "Audio/QuestionableSirBallLewisTheme.wav"
+        else:
+            track=model.prevTrack
     else:
         return
         

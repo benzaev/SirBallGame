@@ -174,7 +174,6 @@ def dealWithMovingObjects(SirBall, frame, gemmap, xWall, wStage, wall_defeated, 
 def rightToBearArms(SirBall, music):
     if(SirBall.stage==16 and SirBall.xDot+w/40>w//10 and SirBall.xDot-w/30<w//10 and SirBall.yDot<4*h/10 and SirBall.yDot>4*h/10-h/10 and not SirBall.armed):
         SirBall.setarmed(True)
-        music=4
         
     return music
 
@@ -473,6 +472,7 @@ def characterInteractions (SirBall, numMess, interact, keys, prevKey, music, fra
     (xDot>=2*w/5 and xDot<2*w/5+w/10 and yDot>=9*h/10-w/20 and numMess<=19 and stage==6) or
     (SirBall.stage==100 and xDot>=w/2-w/7 and xDot<w/2-w/15 and yDot>3*h/4 and not SirBall.in_jump and not SirBall.in_fall and numMess==0 and not Marvin.defeated)):
         interact=True
+        music = 8
     
     # touch the book and leave
     if SirBall.stage==100 and bookRect.colliderect(ballRect) and Marvin.defeated:

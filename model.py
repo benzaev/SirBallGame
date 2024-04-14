@@ -91,9 +91,12 @@ ORANGE=(255, 165, 0)
 
 #for the music
 prevTrack='Audio/Fallen_Reprise.wav'
-def swapTrack(track):
+interact = False
+def swapTrack(track, inter):
     global prevTrack
+    global interact
     prevTrack=track
+    interact = inter
 
 #global objects that move around are stored here
 movingObjects=[]
