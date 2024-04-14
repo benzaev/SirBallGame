@@ -135,7 +135,7 @@ def Marvin100(interact, numMess, SirBall):
         elif(numMess==1018):
             HundredBlit1("As you can see,")
         elif(numMess==1019):
-            HundredBlit3("I've already enslaved", "a legion of bananas","to do my bidding")
+            HundredBlit3("I've already enslaved", "a legion of bats","to do my bidding")
         elif(numMess==1020):
             HundredBlit2("All I need are", "50 more gems")
         elif(numMess==1021):

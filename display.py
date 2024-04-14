@@ -196,6 +196,17 @@ def writeBasics(SirBall, interact):
         text="THANK YOU FOR PLAYING"
         textBounds=(w/2, 2*h/3)
         messagePrint(w//13,text,textBounds,model.WHITE) 
+
+        # credits
+        text="Music: Haiden"
+        textBounds=(50*w/500, 86*h/100)
+        messagePrint(w//50,text,textBounds,model.WHITE) 
+        text="Character design: Gabi"
+        textBounds=(65*w/500, 90*h/100)
+        messagePrint(w//50,text,textBounds,model.WHITE) 
+        text="Coding and concept: benzaev"
+        textBounds=(79*w/500, 94*h/100)
+        messagePrint(w//50,text,textBounds,model.WHITE) 
         
 
 def messagePrint(size,text,textB,color):
@@ -308,7 +319,7 @@ def drawAcessories(SirBall,wall_mad,wall_defeated):
     stage=SirBall.stage
     #instructions for meeting bananas
     if(stage==16):
-        text="USE THE SWORD TO DESTROY THE BANANAS"
+        text="USE THE SWORD TO DESTROY THE BATS"
         textBounds=(w/2,h/20)
         messagePrint(w//50,text,textBounds,model.LGREY)
         text="AVOID THE LASERS!"
